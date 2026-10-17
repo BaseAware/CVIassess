@@ -6,7 +6,7 @@ Web app version of the Baseline Awareness *Violent Critical Incident Preparednes
 - Live weighted scoring sheet, percentage score, and largest point gaps
 - Per-area observation notes
 - Multiple saved assessments (stored in the browser), duplicate, delete
-- Copy summary, export/import JSON, print-ready report
+- PDF report export (top toolbar and bottom of the assessment), copy summary, JSON export/import, print-ready page
 - Brand intro video on first load (`assets/intro.mp4`)
 
 No build step. Open `index.html` in a browser, or host the folder on any static host (GitHub Pages, Netlify, S3).

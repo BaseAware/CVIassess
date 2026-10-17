@@ -8,6 +8,8 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 /* Layout: assessor's worksheet — rubric column on the left, a sticky scoring ledger on the right that mirrors the paper form's A–E columns. */
 :root {
@@ -100,7 +102,11 @@ select.btn { padding-right: 28px; max-width: 260px; }
 
 /* Main grid */
 .grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; padding-block: 20px 60px; align-items: start; }
+.cats-col { display: grid; gap: 14px; min-width: 0; }
 .cats { display: grid; gap: 14px; min-width: 0; }
+.export-bar { display: flex; gap: 14px 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; border: 1px solid var(--navy); background: var(--navy-soft); border-radius: 8px; padding: 16px 18px; }
+.export-bar > div:first-child { display: grid; gap: 2px; min-width: 0; flex: 1 1 260px; }
+.export-bar span { color: var(--muted); font-size: 14px; }
 
 .cat { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 18px 14px; display: grid; gap: 12px; min-width: 0; }
 .cat-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
@@ -212,8 +218,9 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         <button id="delYes" class="btn danger" type="button">Delete</button>
         <button id="delNo" class="btn" type="button">Cancel</button>
       </span>
-      <button id="copyBtn" class="btn" type="button">Copy summary</button>
-      <button id="exportBtn" class="btn host-only" type="button">Export</button>
+      <button class="btn primary act-pdf dl-only" type="button">Export PDF</button>
+      <button class="btn act-json dl-only" type="button">Export JSON</button>
+      <button class="btn act-copy" type="button">Copy summary</button>
       <label class="btn host-only" for="importFile" style="cursor:pointer">Import</label>
       <input id="importFile" type="file" accept="application/json" hidden>
       <button id="printBtn" class="btn host-only" type="button">Print report</button>
@@ -238,7 +245,17 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
   </section>
 
   <div class="grid">
-    <div class="cats" id="cats"></div>
+    <div class="cats-col">
+      <div class="cats" id="cats"></div>
+      <div class="export-bar no-print">
+        <div><b>Finished with this assessment?</b><span>Export a PDF report with the scoring sheet, rubric findings and observations.</span></div>
+        <div class="toolbar">
+          <button class="btn primary act-pdf dl-only" type="button">Export PDF</button>
+          <button class="btn act-json dl-only" type="button">Export JSON</button>
+          <button class="btn act-copy" type="button">Copy summary</button>
+        </div>
+      </div>
+    </div>
 
     <aside class="ledger" aria-label="Score">
       <div class="panel">
@@ -364,9 +381,27 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
   var SAMPLE_ID = "sample";
 
   var inFrame = (function () { try { return window.self !== window.top; } catch (e) { return true; } })();
+  var downloads = null;
+  function setDl(on) { document.querySelectorAll(".dl-only").forEach(function (el) { el.hidden = !on; }); }
   if (inFrame) {
-    // Print and file downloads are unavailable inside an embedded viewer.
+    // Embedded viewers block print and direct downloads; saves go through the viewer's downloads capability when offered.
     document.querySelectorAll(".host-only").forEach(function (el) { el.hidden = true; });
+    setDl(false);
+    if (window.claude && window.claude.use) {
+      window.claude.use("downloads").then(function (d) { downloads = d; setDl(!!d); }, function () {});
+    }
+  }
+  function saveFile(name, blob) {
+    if (downloads) {
+      return downloads.save({ filename: name, data: blob }).then(function () { toast("Saved " + name); }, function (e) {
+        if (e && e.code === "declined") return;
+        toast(e && e.code === "rate_limited" ? "A save is already waiting for your confirmation." : "Saving files is not available here.");
+      });
+    }
+    var link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = name;
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
+    toast("Saved " + name);
   }
 
   function $(id) { return document.getElementById(id); }
@@ -530,7 +565,8 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     });
     return lines.join("\n");
   }
-  $("copyBtn").addEventListener("click", function () {
+  function onAll(cls, fn) { document.querySelectorAll("." + cls).forEach(function (b) { b.addEventListener("click", fn); }); }
+  onAll("act-copy", function () {
     var text = summary();
     function fallback() {
       var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
@@ -541,12 +577,108 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("Summary copied"); }, fallback);
     else fallback();
   });
-  $("exportBtn").addEventListener("click", function () {
-    var a = cur(), blob = new Blob([JSON.stringify(a, null, 2)], { type: "application/json" });
-    var link = document.createElement("a"); link.href = URL.createObjectURL(blob);
-    link.download = ((a.school || "assessment").replace(/[^\w-]+/g, "_")) + "_" + (a.date || "") + ".json";
-    link.click(); setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
+  function baseName(a) { return ((a.school || "assessment").replace(/[^\w-]+/g, "_").replace(/^_+|_+$/g, "") || "assessment") + (a.date ? "_" + a.date : ""); }
+  onAll("act-json", function () {
+    var a = cur(); saveFile(baseName(a) + ".json", new Blob([JSON.stringify(a, null, 2)], { type: "application/json" }));
   });
+  onAll("act-pdf", function () {
+    if (!window.jspdf || !window.jspdf.jsPDF) { toast("The PDF tool did not load. Check your connection and reload the page."); return; }
+    try { var a = cur(); saveFile(baseName(a) + "_VCI_Report.pdf", buildPdf(a)); }
+    catch (e) { toast("The PDF could not be created."); }
+  });
+
+  // ---- PDF report ----
+  function ascii(t) {
+    return String(t == null ? "" : t).replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2013\u2014\u2212]/g, "-").replace(/\u00D7/g, "x").replace(/\u00B7/g, "-").replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "");
+  }
+  function levelText(c, v) {
+    if (v == null) return "Not rated.";
+    var exact = c.levels.filter(function (l) { return l[0] === v; })[0];
+    if (exact) return exact[1] || "Guidance pending.";
+    var lo = c.levels.filter(function (l) { return l[0] < v; }).pop(), hi = c.levels.filter(function (l) { return l[0] > v; })[0];
+    return "Assessor score between rubric levels " + lo[0] + " and " + hi[0] + ".";
+  }
+  function buildPdf(a) {
+    var r = compute(a), doc = new window.jspdf.jsPDF({ unit: "pt", format: "letter" });
+    var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 48, y = M;
+    var NAVY = [31, 58, 107], INK = [21, 23, 28], MUTED = [93, 98, 112], LINE = [226, 222, 211];
+    // Logo bars
+    doc.setFillColor.apply(doc, INK);
+    [[0, 12], [7, 12], [14, 28], [21, 34], [28, 32], [35, 46]].forEach(function (b) { doc.rect(M + b[0], y + 46 - b[1], 4, b[1], "F"); });
+    doc.rect(M - 2, y + 48, 44, 3, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor.apply(doc, INK);
+    doc.text("Baseline Awareness", M + 56, y + 22);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
+    doc.text("BaselineAwareness.com", M + 56, y + 36);
+    doc.setFontSize(9); doc.text("Report generated " + today(), W - M, y + 22, { align: "right" });
+    y += 80;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor.apply(doc, INK);
+    doc.text(doc.splitTextToSize("Violent Critical Incident Preparedness Assessment", W - 2 * M), M, y); y += 26;
+    // School block + score
+    doc.setFontSize(10);
+    [["School", a.school], ["District", a.district], ["Assessor", a.assessor], ["Assessment date", a.date]].forEach(function (f) {
+      doc.setFont("helvetica", "bold"); doc.setTextColor.apply(doc, MUTED); doc.text(f[0].toUpperCase(), M, y);
+      doc.setFont("helvetica", "normal"); doc.setTextColor.apply(doc, INK); doc.text(ascii(f[1] || "-"), M + 118, y); y += 16;
+    });
+    doc.setFont("helvetica", "bold"); doc.setFontSize(44); doc.setTextColor.apply(doc, NAVY);
+    doc.text(Math.round(r.pct) + "%", W - M, y - 30, { align: "right" });
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
+    doc.text(fmt(r.total) + " of " + MAX + " points  |  " + r.scored + " of 11 areas rated", W - M, y - 12, { align: "right" });
+    y += 4; doc.setFillColor.apply(doc, LINE); doc.rect(M, y, W - 2 * M, 6, "F");
+    doc.setFillColor.apply(doc, NAVY); doc.rect(M, y, (W - 2 * M) * Math.min(1, r.pct / 100), 6, "F"); y += 24;
+    // Scoring sheet
+    doc.autoTable({
+      startY: y, margin: { left: M, right: M },
+      head: [["Area", "Site score", "Multiplier", "Total", "Max"]],
+      body: r.rows.map(function (x) { return [ascii(x.c.name), x.v == null ? "-" : String(x.v), fmt(x.c.mult), x.w == null ? "-" : fmt(x.w), fmt(x.c.mult * 10)]; }),
+      foot: [["Totals", "", "13.5", fmt(r.total), String(MAX)]],
+      styles: { font: "helvetica", fontSize: 9.5, cellPadding: 5, textColor: INK, lineColor: LINE, lineWidth: 0.5 },
+      headStyles: { fillColor: NAVY, textColor: 255 }, footStyles: { fillColor: [231, 236, 245], textColor: INK, fontStyle: "bold" },
+      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
+      alternateRowStyles: { fillColor: [250, 248, 242] }
+    });
+    y = doc.lastAutoTable.finalY + 22;
+    // Gaps
+    var gaps = r.rows.filter(function (x) { return x.gap > 0; }).sort(function (p, q) { return q.gap - p.gap; }).slice(0, 4);
+    if (gaps.length) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor.apply(doc, INK); doc.text("Largest point gaps", M, y); y += 15;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+      gaps.forEach(function (g) { doc.text("-" + fmt(g.gap) + " pts   " + ascii(g.c.name) + (g.v == null ? " (not rated)" : ""), M + 8, y); y += 13; });
+    }
+    // Disclaimer
+    doc.setFontSize(8.5);
+    var disc = doc.splitTextToSize(ascii(document.querySelector(".disclaimer").textContent), W - 2 * M);
+    if (y + 12 + disc.length * 11 > H - 40) { doc.addPage(); y = M; }
+    doc.setTextColor.apply(doc, MUTED); doc.text(disc, M, Math.max(y + 12, H - 40 - disc.length * 11));
+    // Findings by area
+    doc.addPage(); y = M;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor.apply(doc, INK); doc.text("Findings by area", M, y); y += 20;
+    r.rows.forEach(function (x, i) {
+      doc.setFontSize(9.5);
+      var body = doc.splitTextToSize(ascii(levelText(x.c, x.v)), W - 2 * M - 12);
+      var notes = a.notes[x.c.key] ? doc.splitTextToSize("Observations: " + ascii(a.notes[x.c.key]), W - 2 * M - 12) : [];
+      var need = 34 + (body.length + notes.length) * 12 + (notes.length ? 4 : 0);
+      if (y + need > H - M) { doc.addPage(); y = M; }
+      doc.setDrawColor.apply(doc, LINE); doc.line(M, y - 10, W - M, y - 10);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor.apply(doc, INK);
+      doc.text((i + 1) + ". " + ascii(x.c.name), M, y + 4);
+      doc.setTextColor.apply(doc, NAVY);
+      doc.text((x.v == null ? "Not rated" : x.v + "/10  x" + fmt(x.c.mult) + " = " + fmt(x.w) + " of " + fmt(x.c.mult * 10)), W - M, y + 4, { align: "right" });
+      y += 20; doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor.apply(doc, INK);
+      doc.text(body, M + 12, y); y += body.length * 12;
+      if (notes.length) { y += 4; doc.setTextColor.apply(doc, MUTED); doc.text(notes, M + 12, y); y += notes.length * 12; }
+      y += 16;
+    });
+    // Footers
+    var n = doc.getNumberOfPages();
+    for (var pg = 1; pg <= n; pg++) {
+      doc.setPage(pg); doc.setFontSize(8); doc.setTextColor.apply(doc, MUTED);
+      doc.text(ascii((a.school || "Untitled assessment") + " - Baseline VCI Preparedness Assessment"), M, H - 24);
+      doc.text("Page " + pg + " of " + n, W - M, H - 24, { align: "right" });
+    }
+    return doc.output("blob");
+  }
   $("importFile").addEventListener("change", function (e) {
     var f = e.target.files[0]; if (!f) return;
     f.text().then(function (t) {
