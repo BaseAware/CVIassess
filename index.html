@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--artifact-start-->
+<title>VCI Preparedness Assessment</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: assessor's worksheet — rubric column on the left, a sticky scoring ledger on the right that mirrors the paper form's A–E columns. */
+:root {
+  --paper: #faf8f2;
+  --surface: #ffffff;
+  --ink: #15171c;
+  --muted: #5d6270;
+  --line: #e2ded3;
+  --navy: #1f3a6b;
+  --navy-soft: #e7ecf5;
+  --good: #2f7a4a;
+  --warn: #a96a12;
+  --crit: #b23b2e;
+  --splash: #faf8f2;
+  --font-display: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #12141a; --surface: #1a1d25; --ink: #eceae4; --muted: #9ba1ae; --line: #2c303b;
+    --navy: #8fb0ea; --navy-soft: #1f2a40; --good: #6cc48b; --warn: #e0a54a; --crit: #ec7a6c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #12141a; --surface: #1a1d25; --ink: #eceae4; --muted: #9ba1ae; --line: #2c303b;
+  --navy: #8fb0ea; --navy-soft: #1f2a40; --good: #6cc48b; --warn: #e0a54a; --crit: #ec7a6c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 15px/1.55 var(--font-body);
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+/* Splash */
+#splash {
+  position: fixed; inset: 0; z-index: 50; background: var(--splash);
+  display: grid; place-items: center; transition: opacity .5s ease;
+}
+#splash video { width: min(736px, 92vw); height: auto; max-width: 100%; }
+#splash.out { opacity: 0; pointer-events: none; }
+#skip {
+  position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  background: transparent; border: 1px solid #1f3a6b; color: #1f3a6b; border-radius: 999px;
+  padding: 6px 16px; cursor: pointer; font-size: 13px; letter-spacing: .04em;
+}
+
+/* Header */
+.wrap {
+  max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+header.top { border-bottom: 1px solid var(--line); background: var(--paper); }
+header.top .wrap { display: flex; align-items: center; gap: 16px; padding-block: 14px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+.brand svg { width: 34px; height: 30px; flex: none; }
+.brand b { font: 600 18px/1.1 var(--font-display); letter-spacing: -.01em; display: block; }
+.brand small { color: var(--muted); font-size: 12px; letter-spacing: .02em; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.btn {
+  border: 1px solid var(--line); background: var(--surface); border-radius: var(--r);
+  padding: 7px 12px; cursor: pointer; font-size: 13px; font-weight: 500;
+}
+.btn:hover { border-color: var(--navy); }
+.btn.primary { background: var(--navy); border-color: var(--navy); color: var(--paper); }
+.btn.danger { color: var(--crit); }
+select.btn { padding-right: 28px; max-width: 260px; }
+
+/* Intro */
+.intro { padding-block: 28px 8px; display: grid; gap: 18px; }
+.intro h1 { font: 600 clamp(24px, 3.4vw, 34px)/1.15 var(--font-display); margin: 0; letter-spacing: -.015em; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); max-width: 70ch; }
+.sample {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  background: var(--navy-soft); color: var(--ink); border-radius: var(--r); padding: 10px 14px; font-size: 14px;
+}
+.meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.meta label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.meta input {
+  border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 8px 10px;
+  font-size: 15px; text-transform: none; letter-spacing: 0; min-width: 0; width: 100%;
+}
+
+/* Main grid */
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; padding-block: 20px 60px; align-items: start; }
+.cats { display: grid; gap: 14px; min-width: 0; }
+
+.cat { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 18px 14px; display: grid; gap: 12px; min-width: 0; }
+.cat-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.cat-num { font: 500 12px var(--font-data); color: var(--muted); }
+.cat h2 { font: 600 18px/1.25 var(--font-display); margin: 0; margin-right: auto; }
+.mult { font: 600 12px var(--font-data); color: var(--navy); background: var(--navy-soft); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.explain { margin: 0; color: var(--muted); font-size: 14px; max-width: 75ch; }
+.levels { display: grid; gap: 6px; }
+.level {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start; text-align: left;
+  border: 1px solid var(--line); background: transparent; border-radius: var(--r); padding: 8px 10px; cursor: pointer; font-size: 14px;
+}
+.level:hover { border-color: var(--navy); }
+.level .v { font: 600 15px var(--font-data); color: var(--muted); text-align: center; padding-top: 1px; }
+.level.on { border-color: var(--navy); background: var(--navy-soft); }
+.level.on .v { color: var(--navy); }
+.level.pending { color: var(--muted); font-style: italic; }
+.adjust { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--paper); }
+.stepper button { border: 0; background: transparent; width: 32px; height: 30px; cursor: pointer; font-size: 16px; }
+.stepper button:hover { background: var(--navy-soft); }
+.stepper output { min-width: 36px; text-align: center; font: 600 15px var(--font-data); color: var(--ink); }
+.weighted { margin-left: auto; font-family: var(--font-data); }
+.linkish { background: none; border: 0; color: var(--navy); cursor: pointer; padding: 0; font-size: 13px; text-decoration: underline; text-underline-offset: 2px; }
+.notes textarea {
+  width: 100%; min-height: 38px; resize: vertical; border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--paper); padding: 8px 10px; font-size: 14px;
+}
+
+/* Ledger */
+.ledger { position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); display: grid; gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 600; margin: 0; }
+.score-row { display: flex; align-items: flex-end; gap: 14px; }
+.pct { font: 600 56px/1 var(--font-data); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.pct small { font-size: 24px; color: var(--muted); }
+.score-sub { font-size: 13px; color: var(--muted); padding-bottom: 6px; font-variant-numeric: tabular-nums; }
+.meter { height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--navy); width: 0; transition: width .3s ease; }
+.bars { display: flex; align-items: flex-end; gap: 4px; height: 70px; border-bottom: 2px solid var(--ink); padding-inline: 2px; }
+.bars span { flex: 1; background: var(--ink); min-height: 2px; transition: height .3s ease; position: relative; }
+.bars span.empty { background: repeating-linear-gradient(0deg, var(--line) 0 2px, transparent 2px 4px); height: 100% !important; opacity: .7; }
+.table-scroll { overflow-x: auto; }
+table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.ledger-table th { text-align: left; font-weight: 600; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; padding: 4px 4px 6px; border-bottom: 1px solid var(--line); }
+.ledger-table td { padding: 5px 4px; border-bottom: 1px solid var(--line); }
+.ledger-table td.n, .ledger-table th.n { text-align: right; font-family: var(--font-data); }
+.ledger-table tr:last-child td { border-bottom: 0; }
+.ledger-table tfoot td { font-weight: 600; border-top: 2px solid var(--ink); border-bottom: 0; }
+.ledger-table a { color: inherit; text-decoration: none; }
+.ledger-table a:hover { color: var(--navy); text-decoration: underline; }
+.dash { color: var(--muted); }
+.gaps { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 13px; }
+.gaps li { display: flex; gap: 10px; align-items: baseline; }
+.gaps b { font-family: var(--font-data); color: var(--crit); min-width: 44px; }
+.disclaimer { font-size: 12px; color: var(--muted); margin: 0; }
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--ink); color: var(--paper); padding: 8px 14px; border-radius: var(--r); font-size: 13px; z-index: 40;
+}
+.confirm { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+.only-print { display: none; }
+
+@media (max-width: 960px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .ledger { position: static; order: -1; }
+  .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .meta { grid-template-columns: minmax(0, 1fr); }
+  .pct { font-size: 44px; }
+  select.btn { max-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+@media print {
+  :root { --paper: #fff; --surface: #fff; --ink: #000; --muted: #444; --line: #ccc; --navy: #1f3a6b; --navy-soft: #eef1f7; }
+  #splash, .toolbar, .sample, .adjust .stepper, .adjust .linkish, .no-print { display: none !important; }
+  .only-print { display: block; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .ledger { position: static; order: -1; break-inside: avoid; }
+  .level:not(.on) { display: none; }
+  .cat { break-inside: avoid; }
+  .notes textarea { border: 0; padding: 0; resize: none; }
+  .notes textarea:placeholder-shown { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="splash" hidden>
+  <video id="introVideo" src="assets/intro.mp4" muted playsinline preload="auto"></video>
+  <button id="skip" type="button">Skip intro</button>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg viewBox="0 0 68 60" aria-hidden="true"><g fill="currentColor"><rect x="4" y="40" width="5" height="12"/><rect x="14" y="40" width="5" height="12"/><rect x="24" y="22" width="5" height="30"/><rect x="34" y="16" width="5" height="36"/><rect x="44" y="18" width="5" height="34"/><rect x="54" y="2" width="5" height="50"/><rect x="0" y="54" width="64" height="4"/></g></svg>
+      <div><b>Baseline Awareness</b><small>Violent Critical Incident Preparedness</small></div>
+    </div>
+    <div class="toolbar">
+      <select id="picker" class="btn" aria-label="Saved assessments"></select>
+      <button id="newBtn" class="btn primary" type="button">New assessment</button>
+      <button id="dupBtn" class="btn" type="button">Duplicate</button>
+      <button id="delBtn" class="btn danger" type="button">Delete</button>
+      <span id="delConfirm" class="confirm" hidden>Delete this assessment?
+        <button id="delYes" class="btn danger" type="button">Delete</button>
+        <button id="delNo" class="btn" type="button">Cancel</button>
+      </span>
+      <button id="copyBtn" class="btn" type="button">Copy summary</button>
+      <button id="exportBtn" class="btn host-only" type="button">Export</button>
+      <label class="btn host-only" for="importFile" style="cursor:pointer">Import</label>
+      <input id="importFile" type="file" accept="application/json" hidden>
+      <button id="printBtn" class="btn host-only" type="button">Print report</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <h1>Baseline Violent Critical Incident Preparedness Assessment</h1>
+    <p>Rate each area from 0 to 10 using the rubric. Each rating is multiplied by its security value multiplier, so measures more likely to save lives, like a full-time School Resource Officer, carry more weight than video surveillance. The final score is the weighted total divided by the maximum possible of 135.</p>
+    <div id="sampleBanner" class="sample" hidden>
+      <span>You are viewing a sample assessment with example ratings. It is not a real school.</span>
+      <button id="sampleNew" class="btn primary" type="button">Start a new assessment</button>
+    </div>
+    <div class="meta">
+      <label for="f-school">School name<input id="f-school" type="text" autocomplete="off"></label>
+      <label for="f-district">District<input id="f-district" type="text" autocomplete="off"></label>
+      <label for="f-assessor">Assessor<input id="f-assessor" type="text" autocomplete="off"></label>
+      <label for="f-date">Assessment date<input id="f-date" type="date"></label>
+    </div>
+  </section>
+
+  <div class="grid">
+    <div class="cats" id="cats"></div>
+
+    <aside class="ledger" aria-label="Score">
+      <div class="panel">
+        <p class="eyebrow">Percentage score</p>
+        <div class="score-row">
+          <div class="pct" id="pct">0<small>%</small></div>
+          <div class="score-sub"><span id="total">0</span> of 135 points<br><span id="scored">0</span> of 11 areas rated</div>
+        </div>
+        <div class="meter"><i id="meter"></i></div>
+        <div class="bars" id="bars" aria-hidden="true"></div>
+      </div>
+
+      <div class="panel">
+        <p class="eyebrow">Scoring sheet</p>
+        <div class="table-scroll">
+          <table class="ledger-table">
+            <thead><tr><th>Area</th><th class="n">Site</th><th class="n">×</th><th class="n">Total</th><th class="n">Max</th></tr></thead>
+            <tbody id="ledgerBody"></tbody>
+            <tfoot><tr><td>Totals</td><td></td><td class="n">13.5</td><td class="n" id="ledgerTotal">0</td><td class="n">135</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="eyebrow">Largest point gaps</p>
+        <ul class="gaps" id="gaps"></ul>
+      </div>
+
+      <div class="panel">
+        <p class="disclaimer"><b>Disclaimer.</b> Baseline Awareness is not a predictor of violence nor a guarantor of safety. All security and emergency planning efforts should be coordinated with, and validated by, local public safety agencies. Scoring is subjective to the assessor’s experience and reflects only the observations at the time of the assessment. This survey does not assess all hazards and should be implemented as part of a larger safety and emergency preparedness program.</p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CATS = [
+    { key: "security", name: "On-Site Security / Law Enforcement", mult: 2,
+      explain: "The presence of law enforcement can be a deterrent and should provide a highly trained response and effective communication to responding agencies.",
+      levels: [[0, "No security or law enforcement officer on campus."],
+               [3, "Unarmed security officer on campus."],
+               [5, "Part-time (50%) School Resource Officer. No other security officers."],
+               [7, "Part-time School Resource Officer with security on campus."],
+               [10, "Full-time School Resource Officer dedicated to the school."]] },
+    { key: "access", name: "Access Control", mult: 2,
+      explain: "Restricting access to the school is a pillar of sound security, and securable classrooms are a vital element of the lockdown strategy.",
+      levels: [[0, "Entry points are not locked during the day. Classrooms are not securable."],
+               [3, "Side and rear entry points are unsecured. Classrooms are not securable."],
+               [5, "Side and rear entrances are secured. Main entrance is unlocked and unmonitored. Classrooms can be secured."],
+               [7, "Side and rear entrances are secured. Main entrance locked and monitored. Classrooms can be secured."],
+               [10, "All entrances secured, without exception, and equipped with door prop alarms. Main entrance is monitored. Classrooms locked during instruction."]] },
+    { key: "training", name: "Active Shooter Response Training", mult: 2,
+      explain: "Training is critical to efficient response. Current U.S. Department of Education and Department of Homeland Security standards of care require schools to implement an options-based approach that includes escape (evacuate, run), lockdown, and the last resort of resisting (counter, fight) the attacker.",
+      levels: [[0, "No active shooter response training or lockdown drills."],
+               [3, "No active shooter response training and only one lockdown drill per year is conducted."],
+               [5, "Active shooter response is discussed, and lockdown drills are conducted at least once per year."],
+               [7, "Options-based training is provided, and lockdown drills are conducted at least 3 times per year."],
+               [10, "Options-based training is provided annually to all staff and age-appropriate training is provided to students. Drills are conducted at least 3 times per year and at least one drill practices the evacuate (or similar) response. One tabletop exercise annually."]] },
+    { key: "threat", name: "Threat Assessment Program", mult: 1.5,
+      explain: "Threat assessment programs are designed to help predict and prevent targeted school violence.",
+      levels: [[0, "No threat assessment program."],
+               [3, "Informal threat assessment program."],
+               [5, "Formal threat assessment program with limited training and resources."],
+               [7, "Formal threat assessment program that includes team development, staff awareness training, involves outside agencies, and is trained and updated annually."],
+               [10, "Formal threat assessment program that includes team development, staff awareness training, involves outside agencies, and includes a case management system. One tabletop exercise annually."]] },
+    { key: "climate", name: "School Climate", mult: 1.5,
+      explain: "Collaboration with students and parents is critical to improving school climate and student wellness. These efforts can also help to prevent violence and increase the likelihood bystanders will report concerning behavior.",
+      levels: [[0, "No program to enhance school climate and encourage student reporting. No formal student engagement programs, and no regular meetings with parents."],
+               [3, "Informal program to enhance school climate and encourage student reporting. No regular meeting with parents."],
+               [5, null],
+               [7, null, "SEL requirement"],
+               [10, null, "SEL, tip line"]] },
+    { key: "comms", name: "Communications", mult: 1.5,
+      explain: "The ability to efficiently communicate greatly improves response capabilities.",
+      levels: [[0, "No ability to communicate with classrooms and totally dependent on telephone to contact local area law enforcement."],
+               [3, "No ability to communicate with classrooms and totally dependent on telephone to contact local area law enforcement. Limited supply of hand-held 2-way radios for staff communications."],
+               [5, "All classrooms can communicate with the main office. While outside, staff are equipped with hand-held 2-way radio(s) or cell phones."],
+               [7, "The school can communicate via 2-way radio with local area law enforcement. All classrooms can communicate with the main office. While outside, staff are equipped with hand-held 2-way radio(s) or cell phones."],
+               [10, "The school can communicate via radio with local law enforcement. Classrooms can communicate with the office AND call 911. All staff have access to an Alyssa’s Law compliant mobile panic alarm. While outside, staff are equipped with radios or cell phones."]] },
+    { key: "assessment", name: "Security Assessment", mult: 1,
+      explain: "Security assessments and safety audits are the tried and proven method of evaluating a facility’s level of safety and security.",
+      levels: [[0, "No security assessment has been conducted."],
+               [3, "An informal site security assessment has been conducted within 3 years."],
+               [5, "A full site security assessment has been conducted within the last 24 months."],
+               [7, "A full site security assessment has been conducted within the last 12 months and is used to develop formal corrective action plans."],
+               [10, "A full site security assessment has been conducted by an independent assessor within the last 12 months. Assessments are based on formal district security standards and are used to develop formal corrective action plans."]] },
+    { key: "awareness", name: "Situational Awareness", mult: 1, explain: "",
+      levels: [[0, "No efforts to enhance situational awareness."],
+               [3, "Unofficial See Something, Say Something campaign."],
+               [5, "Anonymous student tip system with no formal marketing or student engagement plan."],
+               [7, "Highly promoted See Something, Say Something campaign. Anonymous student tip system. Formal arrival and dismissal monitoring by staff who are trained in response and have radios for communications."],
+               [10, "Highly promoted See Something, Say Something campaign. Anonymous student tip system. Formal arrival and dismissal monitoring by staff who are trained in response and have radios for communications. Social media, network, and district-owned device monitoring system."]] },
+    { key: "visitor", name: "Visitor Management", mult: 0.5,
+      explain: "Even if a school has excellent access control, sound visitor management procedures are an important element of safety.",
+      levels: [[0, "No visitor policies are enforced."],
+               [3, "Visitors are encouraged by signage to check in at the main office."],
+               [5, "Visitors cannot enter the school without signing in at the main office."],
+               [7, "Visitors cannot enter the school without signing in at the main office. Sign-in requires valid proof of identification and the issuance of a visitor badge."],
+               [10, "Visitors cannot enter the school without signing in at the main office. Sign-in requires valid proof of identification and the issuance of a visitor badge after a background check."]] },
+    { key: "video", name: "Video Surveillance", mult: 0.25,
+      explain: "Video surveillance can serve as a deterrent and, when properly implemented, help improve law enforcement response.",
+      levels: [[0, "No video surveillance."],
+               [3, "Interior and exterior video surveillance that is not remotely accessible."],
+               [5, "Limited interior and exterior surveillance that may be accessed by law enforcement via a secure off-site login."],
+               [7, "Comprehensive interior and exterior surveillance that may be accessed by law enforcement via a secure off-site login."],
+               [10, "Comprehensive interior and exterior surveillance that may be accessed by law enforcement via a secure off-site login. Law enforcement access is practiced and trained during active threat drills."]] },
+    { key: "reunify", name: "Family Reunification", mult: 0.25, explain: "",
+      levels: [[0, "No formal family reunification plan."],
+               [3, "Untrained and untested family reunification plan."],
+               [5, "Family reunification is trained, but has not been tested by exercise."],
+               [7, "Trained, exercised, and communicated family reunification program that includes reunification site selection and reunification teams."],
+               [10, "Trained, exercised, and communicated family reunification program that includes reunification site selection, reunification teams, crisis communication messaging, and a student release application."]] }
+  ];
+  var MAX = CATS.reduce(function (s, c) { return s + c.mult * 10; }, 0); // 135
+  var STORE = "baseline-vci-assessments-v1";
+  var SAMPLE_ID = "sample";
+
+  var inFrame = (function () { try { return window.self !== window.top; } catch (e) { return true; } })();
+  if (inFrame) {
+    // Print and file downloads are unavailable inside an embedded viewer.
+    document.querySelectorAll(".host-only").forEach(function (el) { el.hidden = true; });
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function fmt(n) { return (Math.round(n * 100) / 100).toString(); }
+  function uid() { return "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function today() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function blank() {
+    var a = { id: uid(), school: "", district: "", assessor: "", date: today(), scores: {}, notes: {}, updated: Date.now() };
+    CATS.forEach(function (c) { a.scores[c.key] = null; a.notes[c.key] = ""; });
+    return a;
+  }
+  function sample() {
+    var a = blank();
+    a.id = SAMPLE_ID; a.school = "Sample: Lincoln Middle School"; a.district = "Example School District";
+    a.assessor = "Example assessor";
+    var s = { security: 5, access: 7, training: 5, threat: 7, climate: 3, comms: 5, assessment: 3, awareness: 5, visitor: 7, video: 7, reunify: 3 };
+    Object.keys(s).forEach(function (k) { a.scores[k] = s[k]; });
+    a.notes.access = "Example note: two side doors found propped open during arrival.";
+    return a;
+  }
+
+  var db = { list: {}, current: null };
+  function load() {
+    try { var raw = localStorage.getItem(STORE); if (raw) { var p = JSON.parse(raw); if (p && p.list) db = p; } } catch (e) {}
+    if (!db.list || !Object.keys(db.list).length) { var s = sample(); db = { list: {}, current: s.id }; db.list[s.id] = s; }
+    if (!db.list[db.current]) db.current = Object.keys(db.list)[0];
+  }
+  var saveTimer;
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) {} }, 150);
+  }
+  function cur() { return db.list[db.current]; }
+
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 2200);
+  }
+
+  // ---- Build category cards once ----
+  var catsEl = $("cats");
+  CATS.forEach(function (c, i) {
+    var el = document.createElement("section");
+    el.className = "cat"; el.id = "cat-" + c.key;
+    var levels = c.levels.map(function (l) {
+      var text = l[1] || ("Guidance pending" + (l[2] ? " (draft note: " + l[2] + ")" : "") + ".");
+      return '<button type="button" class="level' + (l[1] ? "" : " pending") + '" data-v="' + l[0] + '"><span class="v">' + l[0] + "</span><span>" + text + "</span></button>";
+    }).join("");
+    el.innerHTML =
+      '<div class="cat-head"><span class="cat-num">' + String(i + 1).padStart(2, "0") + '</span><h2>' + c.name + '</h2><span class="mult">' + fmt(c.mult) + '× multiplier</span></div>' +
+      (c.explain ? '<p class="explain">' + c.explain + "</p>" : "") +
+      '<div class="levels" role="group" aria-label="' + c.name + ' rubric">' + levels + "</div>" +
+      '<div class="adjust"><span>Site score</span><span class="stepper"><button type="button" data-step="-1" aria-label="Lower ' + c.name + ' score">−</button><output id="out-' + c.key + '">–</output><button type="button" data-step="1" aria-label="Raise ' + c.name + ' score">+</button></span>' +
+      '<button type="button" class="linkish" data-clear>Clear</button><span class="weighted" id="w-' + c.key + '">– / ' + fmt(c.mult * 10) + "</span></div>" +
+      '<div class="notes"><label for="n-' + c.key + '" class="eyebrow" style="display:block;margin-bottom:4px">Observations</label><textarea id="n-' + c.key + '" rows="1" placeholder="Notes, evidence, recommended corrective actions"></textarea></div>';
+    catsEl.appendChild(el);
+
+    el.addEventListener("click", function (e) {
+      var a = cur(), lv = e.target.closest(".level"), st = e.target.closest("[data-step]");
+      if (lv) setScore(c.key, +lv.dataset.v);
+      else if (st) {
+        var v = a.scores[c.key];
+        v = v == null ? (+st.dataset.step > 0 ? 1 : 0) : Math.max(0, Math.min(10, v + +st.dataset.step));
+        setScore(c.key, v);
+      } else if (e.target.closest("[data-clear]")) setScore(c.key, null);
+    });
+    el.querySelector("textarea").addEventListener("input", function (e) { cur().notes[c.key] = e.target.value; touch(); });
+  });
+
+  // Ledger rows + bars
+  var lb = $("ledgerBody"), bars = $("bars");
+  CATS.forEach(function (c) {
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td><a href="#cat-' + c.key + '">' + c.name.replace(" / Law Enforcement", "").replace("Active Shooter Response ", "") + '</a></td><td class="n" id="ls-' + c.key + '"></td><td class="n">' + fmt(c.mult) + '</td><td class="n" id="lt-' + c.key + '"></td><td class="n">' + fmt(c.mult * 10) + "</td>";
+    lb.appendChild(tr);
+    var b = document.createElement("span"); b.id = "b-" + c.key; b.style.flexGrow = c.mult; b.title = c.name; bars.appendChild(b);
+  });
+
+  function setScore(k, v) { cur().scores[k] = v; touch(); render(); }
+  function touch() { cur().updated = Date.now(); save(); }
+
+  function compute(a) {
+    var total = 0, scored = 0, rows = CATS.map(function (c) {
+      var v = a.scores[c.key], w = v == null ? null : v * c.mult;
+      if (v != null) { total += w; scored++; }
+      return { c: c, v: v, w: w, gap: c.mult * 10 - (w || 0) };
+    });
+    return { rows: rows, total: total, scored: scored, pct: total / MAX * 100 };
+  }
+
+  function render() {
+    var a = cur(), r = compute(a);
+    ["school", "district", "assessor", "date"].forEach(function (f) {
+      var el = $("f-" + f); if (document.activeElement !== el) el.value = a[f] || "";
+    });
+    r.rows.forEach(function (row) {
+      var k = row.c.key, el = $("cat-" + k);
+      el.querySelectorAll(".level").forEach(function (b) {
+        var on = row.v != null && +b.dataset.v === row.v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on);
+      });
+      $("out-" + k).textContent = row.v == null ? "–" : row.v;
+      $("w-" + k).textContent = (row.w == null ? "–" : fmt(row.w)) + " / " + fmt(row.c.mult * 10) + " pts";
+      var ta = $("n-" + k); if (document.activeElement !== ta) ta.value = a.notes[k] || "";
+      $("ls-" + k).innerHTML = row.v == null ? '<span class="dash">–</span>' : row.v;
+      $("lt-" + k).innerHTML = row.w == null ? '<span class="dash">–</span>' : fmt(row.w);
+      var b = $("b-" + k); b.classList.toggle("empty", row.v == null); b.style.height = (row.v || 0) * 10 + "%";
+    });
+    $("pct").innerHTML = Math.round(r.pct) + "<small>%</small>";
+    $("total").textContent = fmt(r.total);
+    $("scored").textContent = r.scored;
+    $("ledgerTotal").textContent = fmt(r.total);
+    $("meter").style.width = r.pct + "%";
+
+    var gaps = r.rows.filter(function (x) { return x.gap > 0; }).sort(function (x, y) { return y.gap - x.gap; }).slice(0, 4);
+    $("gaps").innerHTML = gaps.length ? gaps.map(function (g) {
+      return "<li><b>−" + fmt(g.gap) + '</b><a class="linkish" href="#cat-' + g.c.key + '">' + g.c.name + "</a>" + (g.v == null ? ' <span class="dash">(not rated)</span>' : "") + "</li>";
+    }).join("") : "<li>Every area is at its maximum rating.</li>";
+
+    $("sampleBanner").hidden = a.id !== SAMPLE_ID;
+    renderPicker();
+  }
+
+  function label(a) { return (a.school || "Untitled assessment") + (a.date ? " · " + a.date : ""); }
+  function renderPicker() {
+    var p = $("picker"), ids = Object.keys(db.list).sort(function (x, y) { return db.list[y].updated - db.list[x].updated; });
+    p.innerHTML = ids.map(function (id) {
+      var opt = document.createElement("option"); opt.value = id; opt.textContent = label(db.list[id]); if (id === db.current) opt.selected = true; return opt.outerHTML;
+    }).join("");
+  }
+
+  ["school", "district", "assessor", "date"].forEach(function (f) {
+    $("f-" + f).addEventListener("input", function (e) { cur()[f] = e.target.value; touch(); renderPicker(); });
+  });
+  $("picker").addEventListener("change", function (e) { db.current = e.target.value; save(); render(); });
+  function startNew() { var a = blank(); db.list[a.id] = a; db.current = a.id; save(); render(); window.scrollTo(0, 0); $("f-school").focus(); toast("New assessment started"); }
+  $("newBtn").addEventListener("click", startNew);
+  $("sampleNew").addEventListener("click", startNew);
+  $("dupBtn").addEventListener("click", function () {
+    var a = JSON.parse(JSON.stringify(cur())); a.id = uid(); a.school = (a.school || "Untitled") + " (copy)"; a.updated = Date.now();
+    db.list[a.id] = a; db.current = a.id; save(); render(); toast("Assessment duplicated");
+  });
+  $("delBtn").addEventListener("click", function () { $("delBtn").hidden = true; $("delConfirm").hidden = false; });
+  $("delNo").addEventListener("click", function () { $("delBtn").hidden = false; $("delConfirm").hidden = true; });
+  $("delYes").addEventListener("click", function () {
+    delete db.list[db.current];
+    var ids = Object.keys(db.list);
+    if (!ids.length) { var a = blank(); db.list[a.id] = a; ids = [a.id]; }
+    db.current = ids[0]; save(); $("delBtn").hidden = false; $("delConfirm").hidden = true; render(); toast("Assessment deleted");
+  });
+
+  function summary() {
+    var a = cur(), r = compute(a), lines = [
+      "Baseline Violent Critical Incident Preparedness Assessment",
+      "School: " + (a.school || "—") + (a.district ? " (" + a.district + ")" : ""),
+      "Assessor: " + (a.assessor || "—") + "   Date: " + (a.date || "—"),
+      "Score: " + Math.round(r.pct) + "% (" + fmt(r.total) + " of " + MAX + " points; " + r.scored + " of 11 areas rated)", ""
+    ];
+    r.rows.forEach(function (x) {
+      lines.push(x.c.name + ": " + (x.v == null ? "not rated" : x.v + " × " + fmt(x.c.mult) + " = " + fmt(x.w)) + " / " + fmt(x.c.mult * 10) +
+        (a.notes[x.c.key] ? "\n   Notes: " + a.notes[x.c.key] : ""));
+    });
+    return lines.join("\n");
+  }
+  $("copyBtn").addEventListener("click", function () {
+    var text = summary();
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); toast("Summary copied"); } catch (e) { toast("Copy is blocked here. Select the text and copy it manually."); }
+      ta.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("Summary copied"); }, fallback);
+    else fallback();
+  });
+  $("exportBtn").addEventListener("click", function () {
+    var a = cur(), blob = new Blob([JSON.stringify(a, null, 2)], { type: "application/json" });
+    var link = document.createElement("a"); link.href = URL.createObjectURL(blob);
+    link.download = ((a.school || "assessment").replace(/[^\w-]+/g, "_")) + "_" + (a.date || "") + ".json";
+    link.click(); setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
+  });
+  $("importFile").addEventListener("change", function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    f.text().then(function (t) {
+      var a = JSON.parse(t); if (!a || !a.scores) throw new Error("bad");
+      a.id = uid(); a.updated = Date.now(); a.notes = a.notes || {};
+      db.list[a.id] = a; db.current = a.id; save(); render(); toast("Assessment imported");
+    }).catch(function () { toast("That file is not a saved assessment. Choose a .json file exported from this app."); });
+    e.target.value = "";
+  });
+  $("printBtn").addEventListener("click", function () { window.print(); });
+
+  load(); render();
+
+  // ---- Intro splash (once per browser session) ----
+  var splash = $("splash"), vid = $("introVideo");
+  var seen = false;
+  try { seen = sessionStorage.getItem("baseline-intro-seen") === "1"; } catch (e) {}
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function endSplash() {
+    try { sessionStorage.setItem("baseline-intro-seen", "1"); } catch (e) {}
+    splash.classList.add("out"); setTimeout(function () { splash.hidden = true; try { vid.pause(); } catch (e) {} }, 500);
+  }
+  if (!seen && !reduce) {
+    splash.hidden = false;
+    var p = vid.play(); if (p && p.catch) p.catch(endSplash);
+    vid.addEventListener("ended", endSplash);
+    vid.addEventListener("error", endSplash);
+    $("skip").addEventListener("click", endSplash);
+    setTimeout(endSplash, 9000);
+  }
+})();
+</script>
+<!--artifact-end-->
+</body>
+</html>
