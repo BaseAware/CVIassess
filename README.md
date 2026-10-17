@@ -11,4 +11,4 @@ Web app version of the Baseline Awareness *Violent Critical Incident Preparednes
 
 No build step. Open `index.html` in a browser, or host the folder on any static host (GitHub Pages, Netlify, S3).
 
-Note: School Climate levels 5, 7 and 10 are marked "Guidance pending" — the source document had no rubric text for them yet.
+Note: School Climate levels 5, 7 and 10 and the Situational Awareness and Family Reunification explanations were drafted from U.S. Secret Service NTAC, CISA/USSS Bystander Reporting Toolkit, U.S. Dept. of Education school climate, and I Love U Guys Standard Reunification Method guidance. Review before field use.
