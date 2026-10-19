@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!--artifact-start-->
-<title>VCI Preparedness Assessment</title>
+<title>VCI Readiness Assessment</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
-/* Layout: assessor's worksheet — rubric column on the left, a sticky scoring ledger on the right that mirrors the paper form's A–E columns. */
+/* Layout: assessor worksheet. Tabbed rubric column on the left (School, Public Safety, Delay gap), sticky score ledger on the right with both scores. */
 :root {
   --paper: #faf8f2;
   --surface: #ffffff;
@@ -194,6 +194,64 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
   .notes textarea { border: 0; padding: 0; resize: none; }
   .notes textarea:placeholder-shown { display: none; }
 }
+
+/* v2: two scores, sub-items with evidence levels and caps */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tab {
+  border: 0; background: none; padding: 10px 14px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--muted);
+  border-bottom: 3px solid transparent; margin-bottom: -1px;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--navy); }
+.tab small { font: 500 12px var(--font-data); color: var(--muted); margin-left: 6px; }
+.tab-lead { margin: 0; color: var(--muted); font-size: 14px; max-width: 75ch; }
+.phase { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.dom-score { font: 600 15px var(--font-data); white-space: nowrap; }
+.dom-score small { color: var(--muted); font-weight: 400; font-size: 12px; }
+.item { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 8px; }
+.item-head { display: flex; gap: 6px 14px; align-items: baseline; flex-wrap: wrap; }
+.item-head h3 { margin: 0; font: 600 15px/1.3 var(--font-display); margin-right: auto; }
+.verify { font-size: 12px; color: var(--muted); }
+.anchors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.anchors .level { grid-template-columns: 26px minmax(0, 1fr); gap: 8px; font-size: 13px; line-height: 1.4; padding: 8px; }
+.anchors .level .v { font-size: 14px; text-align: left; }
+.anchors .level.near { border-style: dashed; border-color: var(--navy); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--paper); }
+.seg button { border: 0; background: transparent; padding: 5px 10px; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--navy); color: var(--paper); }
+.cap { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--ink); background: var(--paper); border: 1px dashed var(--line); border-radius: var(--r); padding: 8px 10px; cursor: pointer; }
+.cap input { margin-top: 3px; accent-color: var(--crit); }
+.cap.on { border-color: var(--crit); border-style: solid; }
+.cap b { color: var(--crit); }
+.band { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: 2px 9px; }
+.band.good { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.band.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
+.band.crit { color: var(--crit); background: color-mix(in srgb, var(--crit) 14%, transparent); }
+.band.none { color: var(--muted); background: var(--line); }
+.scores { display: grid; gap: 16px; }
+.score-block { display: grid; gap: 8px; }
+.score-block .pct { font-size: 46px; }
+.score-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.score-top b { font-size: 14px; }
+.gap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.gap-grid label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.gap-grid input { border: 1px solid var(--line); background: var(--paper); border-radius: var(--r); padding: 8px 10px; font: 500 15px var(--font-data); width: 100%; min-width: 0; }
+.gap-grid small { font-size: 11px; }
+.gap-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.gap-out div { border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; gap: 2px; background: var(--paper); }
+.gap-out b { font: 600 28px var(--font-data); }
+.gap-out b.pos { color: var(--crit); }
+.gap-out b.neg { color: var(--good); }
+.gap-out span { font-size: 12px; color: var(--muted); }
+.formula { font: 13px var(--font-data); color: var(--muted); background: var(--paper); border-radius: var(--r); padding: 10px 12px; overflow-x: auto; }
+@media (max-width: 720px) {
+  .anchors { grid-template-columns: minmax(0, 1fr); }
+}
+@media print {
+  .tabs { display: none; }
+  [data-panel] { display: grid !important; }
+  .cap:not(.on) { display: none; }
+}
 </style>
 </head>
 <body>
@@ -207,7 +265,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
   <div class="wrap">
     <div class="brand">
       <svg viewBox="0 0 68 60" aria-hidden="true"><g fill="currentColor"><rect x="4" y="40" width="5" height="12"/><rect x="14" y="40" width="5" height="12"/><rect x="24" y="22" width="5" height="30"/><rect x="34" y="16" width="5" height="36"/><rect x="44" y="18" width="5" height="34"/><rect x="54" y="2" width="5" height="50"/><rect x="0" y="54" width="64" height="4"/></g></svg>
-      <div><b>Baseline Awareness</b><small>Violent Critical Incident Preparedness</small></div>
+      <div><b>Baseline Awareness</b><small>VCI Readiness Assessment v2</small></div>
     </div>
     <div class="toolbar">
       <select id="picker" class="btn" aria-label="Saved assessments"></select>
@@ -221,17 +279,17 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       <button class="btn primary act-pdf dl-only" type="button">Export PDF</button>
       <button class="btn act-json dl-only" type="button">Export JSON</button>
       <button class="btn act-copy" type="button">Copy summary</button>
-      <label class="btn host-only" for="importFile" style="cursor:pointer">Import</label>
+      <label class="btn" for="importFile" style="cursor:pointer">Import</label>
       <input id="importFile" type="file" accept="application/json" hidden>
-      <button id="printBtn" class="btn host-only" type="button">Print report</button>
+      <button id="printBtn" class="btn host-only" type="button">Print</button>
     </div>
   </div>
 </header>
 
 <main class="wrap">
   <section class="intro">
-    <h1>Baseline Violent Critical Incident Preparedness Assessment</h1>
-    <p>Rate each area from 0 to 10 using the rubric. Each rating is multiplied by its security value multiplier, so measures more likely to save lives, like a full-time School Resource Officer, carry more weight than video surveillance. The final score is the weighted total divided by the maximum possible of 135.</p>
+    <h1>Violent Critical Incident Readiness Assessment</h1>
+    <p>This evidence-based readiness assessment produces two scores. School Readiness covers what the school controls. Public Safety Readiness covers what police, fire, EMS and dispatch control. Each sub-item is rated 0–10 against written anchors, then weighted by how it was confirmed: verified on site, documented, or self-reported. It is not a predictor of violence.</p>
     <div id="sampleBanner" class="sample" hidden>
       <span>You are viewing a sample assessment with example ratings. It is not a real school.</span>
       <button id="sampleNew" class="btn primary" type="button">Start a new assessment</button>
@@ -246,9 +304,40 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
 
   <div class="grid">
     <div class="cats-col">
-      <div class="cats" id="cats"></div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" type="button" data-tab="S" id="tab-S">School Readiness<small id="tabn-S"></small></button>
+        <button class="tab" role="tab" type="button" data-tab="P" id="tab-P">Public Safety Readiness<small id="tabn-P"></small></button>
+        <button class="tab" role="tab" type="button" data-tab="G" id="tab-G">Delay gap</button>
+      </div>
+
+      <div class="cats" data-panel="S" id="panel-S">
+        <p class="tab-lead">Nine domains the school or district can fix. Prevention 30%, protection 50%, response 15%, recovery 5%.</p>
+      </div>
+      <div class="cats" data-panel="P" id="panel-P" hidden>
+        <p class="tab-lead">Six domains scored with the police, fire, EMS and dispatch agencies that serve the campus. They never lower the School Readiness score.</p>
+      </div>
+      <div class="cats" data-panel="G" id="panel-G" hidden>
+        <section class="cat">
+          <div class="cat-head"><h2>Delay gap</h2><span class="mult">Reported, not scored</span></div>
+          <p class="explain">How many minutes an attacker would be inside before responders could enter. It is shown at the typical and the worst-case response time, so a long drive alone never lowers a score.</p>
+          <div class="formula">Gap = (alert-to-911 + dispatch-to-arrival + arrival-to-entry) − building delay</div>
+          <div class="gap-grid">
+            <label for="g-alert">Alert-to-911 (min)<input id="g-alert" type="number" min="0" step="0.25" inputmode="decimal"><small>From S6 panic alert test or drill timing</small></label>
+            <label for="g-typ">Dispatch-to-arrival, typical (min)<input id="g-typ" type="number" min="0" step="0.25" inputmode="decimal"><small>From P1 dispatch records</small></label>
+            <label for="g-worst">Dispatch-to-arrival, worst case (min)<input id="g-worst" type="number" min="0" step="0.25" inputmode="decimal"><small>90th percentile, from P1</small></label>
+            <label for="g-entry">Arrival-to-entry (min)<input id="g-entry" type="number" min="0" step="0.25" inputmode="decimal"><small>Timed in an exercise, P1</small></label>
+            <label for="g-delay">Building delay (min)<input id="g-delay" type="number" min="0" step="0.25" inputmode="decimal"><small>Perimeter and glazing forced-entry delay, S3</small></label>
+          </div>
+          <div class="gap-out">
+            <div><span>Typical gap</span><b id="gap-typ">–</b><span id="gap-typ-n"></span></div>
+            <div><span>Worst-case gap</span><b id="gap-worst">–</b><span id="gap-worst-n"></span></div>
+          </div>
+          <div class="notes"><label for="n-GAP" class="eyebrow" style="display:block;margin-bottom:4px">Observations</label><textarea id="n-GAP" rows="2" placeholder="Data sources, assumptions, and what would close the gap"></textarea></div>
+        </section>
+      </div>
+
       <div class="export-bar no-print">
-        <div><b>Finished with this assessment?</b><span>Export a PDF report with the scoring sheet, rubric findings and observations.</span></div>
+        <div><b>Finished with this assessment?</b><span>Export a PDF report with both scores, the delay gap and every finding.</span></div>
         <div class="toolbar">
           <button class="btn primary act-pdf dl-only" type="button">Export PDF</button>
           <button class="btn act-json dl-only" type="button">Export JSON</button>
@@ -257,24 +346,29 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       </div>
     </div>
 
-    <aside class="ledger" aria-label="Score">
-      <div class="panel">
-        <p class="eyebrow">Percentage score</p>
-        <div class="score-row">
-          <div class="pct" id="pct">0<small>%</small></div>
-          <div class="score-sub"><span id="total">0</span> of 135 points<br><span id="scored">0</span> of 11 areas rated</div>
+    <aside class="ledger" aria-label="Scores">
+      <div class="panel scores">
+        <div class="score-block">
+          <div class="score-top"><b>School Readiness</b><span class="band none" id="band-S">Not rated</span></div>
+          <div class="score-row"><div class="pct" id="pct-S">0<small>%</small></div><div class="score-sub" id="sub-S"></div></div>
+          <div class="meter"><i id="meter-S"></i></div>
         </div>
-        <div class="meter"><i id="meter"></i></div>
-        <div class="bars" id="bars" aria-hidden="true"></div>
+        <div class="score-block">
+          <div class="score-top"><b>Public Safety Readiness</b><span class="band none" id="band-P">Not rated</span></div>
+          <div class="score-row"><div class="pct" id="pct-P">0<small>%</small></div><div class="score-sub" id="sub-P"></div></div>
+          <div class="meter"><i id="meter-P"></i></div>
+        </div>
+        <div class="score-block">
+          <div class="score-top"><b>Delay gap</b><span class="score-sub" id="gap-side">Not calculated</span></div>
+        </div>
       </div>
 
       <div class="panel">
-        <p class="eyebrow">Scoring sheet</p>
+        <p class="eyebrow">Domain scores</p>
         <div class="table-scroll">
           <table class="ledger-table">
-            <thead><tr><th>Area</th><th class="n">Site</th><th class="n">×</th><th class="n">Total</th><th class="n">Max</th></tr></thead>
+            <thead><tr><th>Domain</th><th class="n">Wt</th><th class="n">Score</th><th class="n">Pts</th></tr></thead>
             <tbody id="ledgerBody"></tbody>
-            <tfoot><tr><td>Totals</td><td></td><td class="n">13.5</td><td class="n" id="ledgerTotal">0</td><td class="n">135</td></tr></tfoot>
           </table>
         </div>
       </div>
@@ -285,7 +379,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       </div>
 
       <div class="panel">
-        <p class="disclaimer"><b>Disclaimer.</b> Baseline Awareness is not a predictor of violence nor a guarantor of safety. All security and emergency planning efforts should be coordinated with, and validated by, local public safety agencies. Scoring is subjective to the assessor’s experience and reflects only the observations at the time of the assessment. This survey does not assess all hazards and should be implemented as part of a larger safety and emergency preparedness program.</p>
+        <p class="disclaimer"><b>Disclaimer.</b> Baseline Awareness is not a predictor of violence nor a guarantor of safety. All security and emergency planning efforts should be coordinated with, and validated by, local public safety agencies. Scoring reflects the assessor’s observations and the evidence available at the time of the assessment. This assessment does not cover all hazards and should be part of a larger safety and emergency preparedness program.</p>
       </div>
     </aside>
   </div>
@@ -297,88 +391,117 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
 (function () {
   "use strict";
 
-  var CATS = [
-    { key: "security", name: "On-Site Security / Law Enforcement", mult: 2,
-      explain: "The presence of law enforcement can be a deterrent and should provide a highly trained response and effective communication to responding agencies.",
-      levels: [[0, "No security or law enforcement officer on campus."],
-               [3, "Unarmed security officer on campus."],
-               [5, "Part-time (50%) School Resource Officer. No other security officers."],
-               [7, "Part-time School Resource Officer with security on campus."],
-               [10, "Full-time School Resource Officer dedicated to the school."]] },
-    { key: "access", name: "Access Control", mult: 2,
-      explain: "Restricting access to the school is a pillar of sound security, and securable classrooms are a vital element of the lockdown strategy.",
-      levels: [[0, "Entry points are not locked during the day. Classrooms are not securable."],
-               [3, "Side and rear entry points are unsecured. Classrooms are not securable."],
-               [5, "Side and rear entrances are secured. Main entrance is unlocked and unmonitored. Classrooms can be secured."],
-               [7, "Side and rear entrances are secured. Main entrance locked and monitored. Classrooms can be secured."],
-               [10, "All entrances secured, without exception, and equipped with door prop alarms. Main entrance is monitored. Classrooms locked during instruction."]] },
-    { key: "training", name: "Active Shooter Response Training", mult: 2,
-      explain: "Training is critical to efficient response. Current U.S. Department of Education and Department of Homeland Security standards of care require schools to implement an options-based approach that includes escape (evacuate, run), lockdown, and the last resort of resisting (counter, fight) the attacker.",
-      levels: [[0, "No active shooter response training or lockdown drills."],
-               [3, "No active shooter response training and only one lockdown drill per year is conducted."],
-               [5, "Active shooter response is discussed, and lockdown drills are conducted at least once per year."],
-               [7, "Options-based training is provided, and lockdown drills are conducted at least 3 times per year."],
-               [10, "Options-based training is provided annually to all staff and age-appropriate training is provided to students. Drills are conducted at least 3 times per year and at least one drill practices the evacuate (or similar) response. One tabletop exercise annually."]] },
-    { key: "threat", name: "Threat Assessment Program", mult: 1.5,
-      explain: "Threat assessment programs are designed to help predict and prevent targeted school violence.",
-      levels: [[0, "No threat assessment program."],
-               [3, "Informal threat assessment program."],
-               [5, "Formal threat assessment program with limited training and resources."],
-               [7, "Formal threat assessment program that includes team development, staff awareness training, involves outside agencies, and is trained and updated annually."],
-               [10, "Formal threat assessment program that includes team development, staff awareness training, involves outside agencies, and includes a case management system. One tabletop exercise annually."]] },
-    { key: "climate", name: "School Climate", mult: 1.5,
-      explain: "Collaboration with students and parents is critical to improving school climate and student wellness. These efforts can also help to prevent violence and increase the likelihood bystanders will report concerning behavior.",
-      levels: [[0, "No program to enhance school climate and encourage student reporting. No formal student engagement programs, and no regular meetings with parents."],
-               [3, "Informal program to enhance school climate and encourage student reporting. No regular meeting with parents."],
-               [5, "A designated staff lead coordinates climate efforts. Students are surveyed on school climate at least every two years. An anti-bullying policy is enforced and communicated to students and parents. School leaders meet with parents at least once per year."],
-               [7, "Annual climate survey of students, staff, and parents, with results used to set improvement goals. Evidence-based social-emotional learning (SEL) is delivered to all students. Every student has an identified trusted adult. A formal student engagement program (such as a student safety or advisory council) is in place. Regular parent meetings are held each semester."],
-               [10, "All level 7 elements, plus: a written climate improvement plan tied to survey results, reviewed annually and shared with the community. Students and parents serve on the school safety or climate team. Staff are trained annually to reduce barriers to reporting, such as fear of retaliation or assuming someone else will report. A promoted tip line is part of climate efforts, and reporters are told their concern was received and acted on."]] },
-    { key: "comms", name: "Communications", mult: 1.5,
-      explain: "The ability to efficiently communicate greatly improves response capabilities.",
-      levels: [[0, "No ability to communicate with classrooms and totally dependent on telephone to contact local area law enforcement."],
-               [3, "No ability to communicate with classrooms and totally dependent on telephone to contact local area law enforcement. Limited supply of hand-held 2-way radios for staff communications."],
-               [5, "All classrooms can communicate with the main office. While outside, staff are equipped with hand-held 2-way radio(s) or cell phones."],
-               [7, "The school can communicate via 2-way radio with local area law enforcement. All classrooms can communicate with the main office. While outside, staff are equipped with hand-held 2-way radio(s) or cell phones."],
-               [10, "The school can communicate via radio with local law enforcement. Classrooms can communicate with the office AND call 911. All staff have access to an Alyssa’s Law compliant mobile panic alarm. While outside, staff are equipped with radios or cell phones."]] },
-    { key: "assessment", name: "Security Assessment", mult: 1,
-      explain: "Security assessments and safety audits are the tried and proven method of evaluating a facility’s level of safety and security.",
-      levels: [[0, "No security assessment has been conducted."],
-               [3, "An informal site security assessment has been conducted within 3 years."],
-               [5, "A full site security assessment has been conducted within the last 24 months."],
-               [7, "A full site security assessment has been conducted within the last 12 months and is used to develop formal corrective action plans."],
-               [10, "A full site security assessment has been conducted by an independent assessor within the last 12 months. Assessments are based on formal district security standards and are used to develop formal corrective action plans."]] },
-    { key: "awareness", name: "Situational Awareness", mult: 1,
-      explain: "Situational awareness is how quickly a school notices warning signs and acts on them. Attackers often tell others about their plans or show concerning behavior first, yet U.S. Secret Service research found that in most completed school attacks someone saw a warning sign that was never reported. Promoted reporting campaigns, trained staff at arrival and dismissal turn those observations into action.",
-      levels: [[0, "No efforts to enhance situational awareness."],
-               [3, "Unofficial See Something, Say Something campaign."],
-               [5, "Formal See Something, Say Something campaign communicated to students, staff, and parents. Staff are assigned to supervise arrival and dismissal."],
-               [7, "Highly promoted See Something, Say Something campaign. Formal arrival and dismissal monitoring by staff who are trained in response and have radios for communications."],
-               [10, "Highly promoted See Something, Say Something campaign. Formal arrival and dismissal monitoring by staff who are trained in response and have radios for communications. Social media, network, and district-owned device monitoring system."]] },
-    { key: "visitor", name: "Visitor Management", mult: 0.5,
-      explain: "Even if a school has excellent access control, sound visitor management procedures are an important element of safety.",
-      levels: [[0, "No visitor policies are enforced."],
-               [3, "Visitors are encouraged by signage to check in at the main office."],
-               [5, "Visitors cannot enter the school without signing in at the main office."],
-               [7, "Visitors cannot enter the school without signing in at the main office. Sign-in requires valid proof of identification and the issuance of a visitor badge."],
-               [10, "Visitors cannot enter the school without signing in at the main office. Sign-in requires valid proof of identification and the issuance of a visitor badge after a background check."]] },
-    { key: "video", name: "Video Surveillance", mult: 0.25,
-      explain: "Video surveillance can serve as a deterrent and, when properly implemented, help improve law enforcement response.",
-      levels: [[0, "No video surveillance."],
-               [3, "Interior and exterior video surveillance that is not remotely accessible."],
-               [5, "Limited interior and exterior surveillance that may be accessed by law enforcement via a secure off-site login."],
-               [7, "Comprehensive interior and exterior surveillance that may be accessed by law enforcement via a secure off-site login."],
-               [10, "Comprehensive interior and exterior surveillance that may be accessed by law enforcement via a secure off-site login. Law enforcement access is practiced and trained during active threat drills."]] },
-    { key: "reunify", name: "Family Reunification", mult: 0.25,
-      explain: "Family reunification is the controlled release of students to authorized guardians after an evacuation or crisis. Without a practiced plan, parents converge on the scene, roads jam, emergency response is slowed, and students can be released to the wrong person. A trained and exercised plan with a pre-selected site and an accountable release process protects students and keeps the scene clear for responders.",
-      levels: [[0, "No formal family reunification plan."],
-               [3, "Untrained and untested family reunification plan."],
-               [5, "Family reunification is trained, but has not been tested by exercise."],
-               [7, "Trained, exercised, and communicated family reunification program that includes reunification site selection and reunification teams."],
-               [10, "Trained, exercised, and communicated family reunification program that includes reunification site selection, reunification teams, crisis communication messaging, and a student release application."]] }
+  // Rubric v2. Anchors at 0, 5 and 10; 3 and 7 sit between.
+  var DOMAINS = [
+    { code: "S1", group: "S", phase: "Prevention", weight: 20, name: "Behavioral Threat Assessment & Management", short: "Threat Assessment (BTAM)",
+      items: [
+        ["Model and team", "No team", "Team exists; no standard model or missing disciplines", "Standard model (e.g., CSTAG or state model); admin, mental health and law enforcement on the team; all trained within 2 years", "Roster, training certificates"],
+        ["Case records", "None kept", "Kept for some cases, inconsistent", "Every case in a case management system with follow-up dates and closure criteria", "Review 5 recent de-identified case files"],
+        ["Classification and intervention", "Threats handled only through discipline", "Transient vs. substantive judged informally", "Every case classified; substantive cases get written safety and support plans; suspensions and arrests tracked and justified", "Case files, discipline data"],
+        ["Information sharing", "None", "Informal calls with police or mental health", "Written agreements covering the FERPA health-or-safety exception, HIPAA and records access; legal basis documented for every data source", "MOUs, legal review"],
+        ["Staff awareness", "Staff not trained to spot or refer", "Some staff trained", "All staff trained yearly on warning behaviors, including leakage, and the referral path", "Training logs, staff interviews"]],
+      caps: [{ text: "No case records are kept", max: 50 }, { text: "Social media, monitoring or database access is used without documented legal authority", max: 50 }] },
+    { code: "S2", group: "S", phase: "Prevention", weight: 10, name: "Climate & Reporting", short: "Climate & Reporting",
+      items: [
+        ["Climate measurement", "None", "Student survey every 2 years", "Yearly student, staff and parent survey; results drive a written improvement plan", "Survey results, plan"],
+        ["Connectedness", "No programs", "SEL or advisory for some students", "SEL for all students; every student has an identified trusted adult; student safety council", "Program records, student interviews"],
+        ["Reporting access", "No anonymous channel", "One channel (phone or web), school hours only", "Anonymous app, web, text and phone; monitored 24/7; written triage time standard", "After-hours test tip, time to acknowledgement"],
+        ["Reporting trust", "Not measured", "Promoted See Something, Say Something campaign", "Survey measures willingness to report and belief that reports lead to help; reporters told their concern was handled", "Survey items, closure records"]],
+      caps: [{ text: "A test tip sent after hours got no response within the triage standard", item: 2, rating: 3 }] },
+    { code: "S3", group: "S", phase: "Protection", weight: 15, name: "Access Control & Delay", short: "Access Control & Delay",
+      items: [
+        ["Perimeter doors", "Unlocked during the day", "All exterior doors locked; no prop alarms", "All locked; door-prop alarms monitored; daily door checks logged", "Walk the perimeter, alarm test"],
+        ["Main entry and visitors", "Unlocked or unmonitored", "Locked with camera buzz-in; sign-in at office", "Secure vestibule; ID scanned and badge issued before entry to student areas", "Observe entry, test as visitor"],
+        ["Classroom lockdown", "Rooms cannot lock", "Lock from inside with a key", "Every instructional space locks from inside without a key or stepping into the hall; locked during instruction", "Spot-check 10 rooms"],
+        ["Glazing delay", "Standard glass at entry and ground floor", "Film or rated glazing at main entry only", "Entry and ground-floor glazing forced-entry rated or tested; delay time documented", "Product specs, test records"]],
+      caps: [{ text: "An exterior door was found propped or unlocked during the assessment", max: 50 }] },
+    { code: "S4", group: "S", phase: "Protection", weight: 10, name: "On-Site Security & SRO Integration", short: "SRO Integration",
+      items: [
+        ["Coverage", "No officer or security", "Part-time SRO, or full-time unarmed security", "Full-time SRO with a written backup plan for absences", "Schedules, backup plan"],
+        ["Officer training", "No school-specific training", "Basic SRO course", "State-certified school-based law enforcement course and single officer active-threat response training within 2 years", "Certificates"],
+        ["MOU and role", "No MOU", "MOU without defined roles", "MOU defines the immediate active-threat role, keeps the officer out of routine discipline, sets data-sharing rules; reviewed yearly", "MOU"],
+        ["Integration", "Officer not in school plans", "Officer knows the plan", "Officer part of BTA team, joins drills, carries building access and a radio on the police channel", "Interviews, drill records"]],
+      caps: [{ text: "No MOU between the school and the law enforcement agency", max: 50 }] },
+    { code: "S5", group: "S", phase: "Protection", weight: 25, name: "Emergency Training & Drills", short: "Training & Drills",
+      explain: "Drills follow trauma-informed practice. The drill day may be unannounced to students, but every alert says “this is a drill,” with no simulated attackers, gunfire or injuries.",
+      items: [
+        ["Options-based training", "Lockdown only", "Options discussed with staff", "All staff trained yearly in an options-based model (e.g., Run-Hide-Fight, Avoid-Deny-Defend); age-appropriate student instruction", "Curriculum, training logs"],
+        ["Drill frequency and variety", "None", "1–2 lockdown drills a year", "3 or more a year at varied times (lunch, passing period, recess); at least one practices evacuation", "Drill log"],
+        ["Drill safety design", "Deceptive or high-sensory drills (blanks, actors, fake injuries, unannounced to staff)", "Announced drills, no debrief", "Staff notified ahead; students told it is a drill; stated learning goals; debrief and after-action notes; support for students with trauma histories", "Drill plans, after-action reports"],
+        ["Access and functional needs", "Not addressed", "Some individual plans", "Every student with a disability has an individual emergency plan; visual and audible alerts; mobility evacuation equipment; aides assigned", "Plans, walk-through"],
+        ["Staff coverage", "Teachers only, or none", "Teachers and admin", "All staff, including substitutes, aides, custodians, food service and bus drivers; online and in-person formats", "Training roster"],
+        ["Tabletop exercise", "None", "Every 2–3 years", "Yearly, with police, fire and EMS", "Exercise records"]],
+      caps: [{ text: "A deceptive or high-sensory drill was held in the last 12 months", max: 30 }] },
+    { code: "S6", group: "S", phase: "Response", weight: 5, name: "Alerting & Communications", short: "Alerting & Comms",
+      items: [
+        ["Panic alert", "None", "Fixed panic buttons in the office", "Alyssa’s Law–compliant mobile panic alert to 911 for all staff, tested every quarter", "Test log, live test"],
+        ["Classroom communication", "None", "Classroom to office only", "Every room can reach the office and 911 directly", "Spot-check 5 rooms"],
+        ["Mass notification", "Overhead PA only", "PA plus staff text alert", "One action triggers the lockdown announcement, staff alert, strobes and a parent message template", "Demo"],
+        ["Report quality", "No training", "Office staff know what to tell 911", "All staff trained in a standard report format (e.g., L-CAN: Location, Conditions, Actions, Needs) and practice it in drills", "Training, drill observation"],
+        ["Radios", "None", "Admin radios only", "Radios for admin, custodians, outdoor and arrival/dismissal staff; dead zones mapped", "Radio count, coverage walk"]] },
+    { code: "S7", group: "S", phase: "Response", weight: 5, name: "Bleeding Control", short: "Bleeding Control",
+      items: [
+        ["Kits", "None", "Kits in office or nurse’s room", "Kits in every classroom and common area, mapped and inspected yearly", "Spot-check, inspection log"],
+        ["Staff certified", "None", "Under 50% of staff", "80% or more of staff trained in Stop the Bleed within 2 years", "Training roster"],
+        ["Plan integration", "Not in the plan", "In the written plan", "Bleeding control practiced in drills; nurse and athletic trainer roles defined; casualty collection points agreed with EMS", "Plan, drill records"]] },
+    { code: "S8", group: "S", phase: "Response", weight: 5, name: "Responder Access", short: "Responder Access",
+      items: [
+        ["Responder maps", "None", "Floor plans exist, not shared", "Gridded responder maps (e.g., Collaborative Response Graphics) shared with police, fire and dispatch; updated yearly", "Maps, agency confirmation"],
+        ["Exterior labeling", "None", "Rooms numbered inside only", "Building sides labeled A/B/C/D, exterior doors numbered, room numbers visible from outside", "Walk the exterior"],
+        ["Rapid entry", "None", "Keys held at the police station", "Rapid-entry key box and responder access credentials, tested yearly", "Key box test"],
+        ["Camera access", "No cameras, or no responder access", "On-site viewing only", "Secure remote access for dispatch and police under a written use policy, tested in a drill", "Policy, live test"]] },
+    { code: "S9", group: "S", phase: "Recovery", weight: 5, name: "Reunification & Recovery", short: "Reunification",
+      items: [
+        ["Plan", "None", "Written plan", "Formal method (e.g., Standard Reunification Method); primary and backup sites; teams assigned", "Plan"],
+        ["Exercise", "Never", "Tabletop only", "Functional exercise every 2 years, including transport", "Exercise records"],
+        ["Release accountability", "None", "Paper sign-out", "ID checked against authorized guardians; digital release record", "Demo"],
+        ["Recovery", "None", "Counseling contacts listed", "Written mental health recovery plan; crisis communication templates; family assistance staff assigned", "Plan, templates"]] },
+
+    { code: "P1", group: "P", weight: 20, name: "Response Time Analysis & Planning", short: "Response Time Planning", with: "Police, dispatch",
+      explain: "Response times vary with staffing, distance and other calls in progress. P1 does not reward a fast agency or penalize a rural one. It scores whether the agencies and the school know their realistic response window, including the worst case, and plan around it.",
+      items: [
+        ["Response time analysis", "Unknown", "Agency-wide average only", "Campus-specific analysis from dispatch records showing typical and worst-case times (90th percentile), including nights, weekends, school events and times when nearby units are on other calls", "Dispatch records"],
+        ["Arrival-to-entry time", "Unknown", "Estimated", "Timed in an exercise from arrival to interior entry", "Exercise timing"],
+        ["Planning use", "Not shared with the school", "Shared with the school", "Worst-case time used to set the school’s delay goals (S3), mutual aid triggers and staffing plans for high-risk times", "Plans, meeting notes"]] },
+    { code: "P2", group: "P", weight: 20, name: "Patrol Active-Threat Capability & Breaching", short: "Patrol & Breaching", with: "Police",
+      items: [
+        ["Training", "None in 3 years", "Some officers trained", "Every patrol officer likely to respond trained in immediate solo or team entry within 2 years, with yearly refreshers", "Training records"],
+        ["Policy", "No policy, or contain-and-wait", "Policy exists, not trained", "Written policy requires immediate entry to stop the killing; first officers act without waiting for a team or supervisor", "Policy"],
+        ["Breaching", "No tools", "Tools with supervisors or some cars", "Breaching tools in every patrol car; officers trained on this school’s door hardware", "Vehicle check"],
+        ["Site familiarity", "None", "SRO only", "Patrol walk-throughs yearly; school maps loaded in vehicles", "Logs, in-car check"]] },
+    { code: "P3", group: "P", weight: 20, name: "Rescue Task Force & Tactical Medical Care", short: "Rescue Task Force", with: "Police, fire, EMS",
+      items: [
+        ["Joint rescue doctrine", "None", "Policy exists, not trained", "Joint police, fire and EMS rescue task force policy for entering the warm zone, trained yearly", "Policy, training records"],
+        ["Protective equipment", "None", "Some units", "Ballistic protection issued and fitted for every rescue task force medic", "Equipment inventory"],
+        ["Officer medical", "No tourniquets", "Tourniquets issued", "Every officer carries an individual first aid kit and is trained in tactical emergency casualty care", "Spot-check, training"],
+        ["Mass casualty plan", "None", "Generic county plan", "Casualty collection points, triage and hospital notification pre-planned for this school and exercised", "Plan, exercise records"]] },
+    { code: "P4", group: "P", weight: 15, name: "Unified Command & Joint Exercises", short: "Unified Command", with: "All agencies, district",
+      items: [
+        ["ICS training", "None", "Agency command staff only", "School administrators and agency leaders trained in the Incident Command System; command post sites pre-identified", "Certificates, plan"],
+        ["Unified command", "Agencies operate separately", "Written plan only", "Unified command practiced in a joint full-scale exercise within 3 years, including a school liaison role", "Exercise records"],
+        ["Mutual aid and self-deployment", "None", "Mutual aid agreements exist", "Agreements include staging and accountability to control self-deploying responders", "Agreements"],
+        ["After-action follow-through", "None", "After-action reports written", "Improvement items tracked to completion", "Improvement plan"]] },
+    { code: "P5", group: "P", weight: 15, name: "Interoperable Radio & In-Building Coverage", short: "Radio & Coverage", with: "Police, fire, radio shop",
+      items: [
+        ["In-building coverage", "Never tested", "Tested; gaps found, not fixed", "Signal test shows coverage in basements, stairwells and interior corridors; amplifiers installed where needed", "Signal test report"],
+        ["Interoperability", "Agencies on separate channels", "Patches possible through dispatch", "Shared talkgroups pre-assigned for school incidents; school can reach police by radio", "Radio plan, live test"],
+        ["Dispatch protocol", "None", "Generic protocol", "Active-threat dispatch protocol takes structured reports (e.g., L-CAN) and relays them to the field", "Protocol, call review"],
+        ["911 call surge", "No plan", "Overflow routing only", "Surge plan for mass calls, including text-to-911 and backup answering point", "Plan"]] },
+    { code: "P6", group: "P", weight: 10, name: "Real-Time Video & Information Relay", short: "Video & Info Relay", with: "Dispatch, police",
+      items: [
+        ["Live video access", "None", "Access exists, never tested", "Dispatch or a real-time crime center can view school cameras live, tested yearly", "Live test"],
+        ["Relay role", "None", "Informal", "A designated, trained dispatcher or analyst relays suspect location and conditions to entry teams", "Role description, exercise"],
+        ["Use policy", "None", "Informal understanding", "Written policy limits live access to emergencies; access logged and audited", "Policy, audit log"]],
+      caps: [{ text: "Live video access exists without a written use policy", max: 50 }] }
   ];
-  var MAX = CATS.reduce(function (s, c) { return s + c.mult * 10; }, 0); // 135
-  var STORE = "baseline-vci-assessments-v1";
+  var GROUPS = { S: "School Readiness", P: "Public Safety Readiness" };
+  var EV = { V: { label: "Verified", m: 1 }, D: { label: "Documented", m: 0.9 }, S: { label: "Self-reported", m: 0.8 } };
+  var EV_ORDER = ["V", "D", "S"];
+  var BANDS = [[80, "Advanced", "good"], [60, "Established", "good"], [40, "Developing", "warn"], [0, "Critical gaps", "crit"]];
+  var GAP_FIELDS = ["alert", "typ", "worst", "entry", "delay"];
+  var STORE = "baseline-vci-v2";
   var SAMPLE_ID = "sample";
+  var byCode = {}; DOMAINS.forEach(function (d) { byCode[d.code] = d; });
 
   var inFrame = (function () { try { return window.self !== window.top; } catch (e) { return true; } })();
   var downloads = null;
@@ -391,43 +514,42 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       window.claude.use("downloads").then(function (d) { downloads = d; setDl(!!d); }, function () {});
     }
   }
-  function saveFile(name, blob) {
-    if (downloads) {
-      return downloads.save({ filename: name, data: blob }).then(function () { toast("Saved " + name); }, function (e) {
-        if (e && e.code === "declined") return;
-        toast(e && e.code === "rate_limited" ? "A save is already waiting for your confirmation." : "Saving files is not available here.");
-      });
-    }
-    var link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = name;
-    document.body.appendChild(link); link.click(); link.remove();
-    setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
-    toast("Saved " + name);
-  }
 
   function $(id) { return document.getElementById(id); }
-  function fmt(n) { return (Math.round(n * 100) / 100).toString(); }
+  function fmt(n) { return (Math.round(n * 10) / 10).toString(); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function uid() { return "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function today() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function key(d, i) { return d.code + "." + i; }
+  function band(p, any) { if (!any) return ["Not rated", "none"]; for (var i = 0; i < BANDS.length; i++) if (p >= BANDS[i][0]) return [BANDS[i][1], BANDS[i][2]]; }
+
   function blank() {
-    var a = { id: uid(), school: "", district: "", assessor: "", date: today(), scores: {}, notes: {}, updated: Date.now() };
-    CATS.forEach(function (c) { a.scores[c.key] = null; a.notes[c.key] = ""; });
-    return a;
+    return { version: 2, id: uid(), school: "", district: "", assessor: "", date: today(), items: {}, caps: {}, notes: {}, gap: {}, updated: Date.now() };
   }
   function sample() {
     var a = blank();
-    a.id = SAMPLE_ID; a.school = "Sample: Lincoln Middle School"; a.district = "Example School District";
-    a.assessor = "Example assessor";
-    var s = { security: 5, access: 7, training: 5, threat: 7, climate: 3, comms: 5, assessment: 3, awareness: 5, visitor: 7, video: 7, reunify: 3 };
-    Object.keys(s).forEach(function (k) { a.scores[k] = s[k]; });
-    a.notes.access = "Example note: two side doors found propped open during arrival.";
+    a.id = SAMPLE_ID; a.school = "Sample: Lincoln Middle School"; a.district = "Example School District"; a.assessor = "Example assessor";
+    var r = {
+      S1: [[7, "D"], [5, "D"], [5, "S"], [3, "D"], [5, "S"]], S2: [[5, "D"], [5, "S"], [7, "V"], [3, "S"]],
+      S3: [[7, "V"], [5, "V"], [7, "V"], [3, "D"]], S4: [[5, "D"], [7, "D"], [5, "D"], [7, "S"]],
+      S5: [[7, "D"], [5, "D"], [7, "D"], [3, "S"], [5, "D"], [3, "D"]], S6: [[5, "V"], [5, "V"], [5, "V"], [3, "S"], [5, "V"]],
+      S7: [[3, "V"], [3, "D"], [0, "D"]], S8: [[3, "D"], [3, "V"], [5, "V"], [5, "D"]], S9: [[5, "D"], [3, "D"], [5, "S"], [3, "D"]],
+      P1: [[5, "D"], [0, "S"], [3, "S"]], P2: [[7, "D"], [10, "D"], [5, "V"], [3, "S"]], P3: [[3, "D"], [5, "D"], [5, "V"], [3, "D"]],
+      P4: [[5, "D"], [3, "D"], [5, "D"], [3, "S"]], P5: [[3, "D"], [5, "S"], [5, "D"], [3, "S"]], P6: [[5, "S"], [0, "S"], [0, "S"]]
+    };
+    Object.keys(r).forEach(function (c) { r[c].forEach(function (x, i) { a.items[c + "." + i] = { r: x[0], e: x[1] }; }); });
+    a.caps["S3.0"] = true;
+    a.notes.S3 = "Example note: side door B-4 found propped open during arrival.";
+    a.gap = { alert: 1, typ: 6, worst: 11, entry: 1.5, delay: 2 };
     return a;
   }
 
-  var db = { list: {}, current: null };
+  var db = { list: {}, current: null, tab: "S" };
   function load() {
     try { var raw = localStorage.getItem(STORE); if (raw) { var p = JSON.parse(raw); if (p && p.list) db = p; } } catch (e) {}
-    if (!db.list || !Object.keys(db.list).length) { var s = sample(); db = { list: {}, current: s.id }; db.list[s.id] = s; }
+    if (!db.list || !Object.keys(db.list).length) { var s = sample(); db = { list: {}, current: s.id, tab: "S" }; db.list[s.id] = s; }
     if (!db.list[db.current]) db.current = Object.keys(db.list)[0];
+    if (!/^[SPG]$/.test(db.tab || "")) db.tab = "S";
   }
   var saveTimer;
   function save() {
@@ -435,91 +557,166 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     saveTimer = setTimeout(function () { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) {} }, 150);
   }
   function cur() { return db.list[db.current]; }
+  function touch() { cur().updated = Date.now(); save(); }
 
   function toast(msg) {
     var t = $("toast"); t.textContent = msg; t.hidden = false;
-    clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 2200);
+    clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 2400);
   }
 
-  // ---- Build category cards once ----
-  var catsEl = $("cats");
-  CATS.forEach(function (c, i) {
+  // ---- Scoring ----
+  function domainScore(a, d) {
+    var sum = 0, rated = 0, capNote = [];
+    var itemCaps = {};
+    (d.caps || []).forEach(function (c, ci) { if (a.caps[d.code + "." + ci] && c.item != null) itemCaps[c.item] = c.rating; });
+    var rows = d.items.map(function (it, i) {
+      var v = a.items[key(d, i)] || {}, r = v.r == null ? null : v.r, e = v.e || "S", eff = r;
+      if (r != null && itemCaps[i] != null && r > itemCaps[i]) eff = itemCaps[i];
+      var pts = r == null ? 0 : eff * EV[e].m;
+      if (r != null) { rated++; sum += pts; }
+      return { it: it, r: r, e: e, eff: eff, pts: pts };
+    });
+    var pct = sum / (d.items.length * 10) * 100, raw = pct;
+    (d.caps || []).forEach(function (c, ci) {
+      if (!a.caps[d.code + "." + ci]) return;
+      if (c.max != null && pct > c.max) pct = c.max;
+      capNote.push(c.item != null ? "“" + d.items[c.item][0] + "” capped at " + c.rating : "Capped at " + c.max + "%");
+    });
+    return { d: d, pct: pct, raw: raw, rated: rated, n: d.items.length, rows: rows, capNote: capNote, pts: pct * d.weight / 100 };
+  }
+  function groupScore(a, g) {
+    var doms = DOMAINS.filter(function (d) { return d.group === g; }).map(function (d) { return domainScore(a, d); });
+    var total = doms.reduce(function (s, x) { return s + x.pts; }, 0);
+    var rated = doms.reduce(function (s, x) { return s + x.rated; }, 0), n = doms.reduce(function (s, x) { return s + x.n; }, 0);
+    return { doms: doms, pct: total, rated: rated, n: n };
+  }
+  function gapCalc(a) {
+    var g = a.gap || {}, ok = GAP_FIELDS.every(function (f) { return g[f] !== "" && g[f] != null && !isNaN(+g[f]); });
+    if (!ok) return null;
+    var base = +g.alert + +g.entry - +g.delay;
+    return { typ: base + +g.typ, worst: base + +g.worst };
+  }
+  function gapText(m) { return m > 0 ? fmt(m) + " min inside before entry" : "Delay outlasts response by " + fmt(-m) + " min"; }
+
+  // ---- Build domain cards once ----
+  function anchorFor(v) { return v === 0 ? 1 : v === 5 ? 2 : v === 10 ? 3 : null; }
+  DOMAINS.forEach(function (d) {
     var el = document.createElement("section");
-    el.className = "cat"; el.id = "cat-" + c.key;
-    var levels = c.levels.map(function (l) {
-      var text = l[1] || ("Guidance pending" + (l[2] ? " (draft note: " + l[2] + ")" : "") + ".");
-      return '<button type="button" class="level' + (l[1] ? "" : " pending") + '" data-v="' + l[0] + '"><span class="v">' + l[0] + "</span><span>" + text + "</span></button>";
-    }).join("");
-    el.innerHTML =
-      '<div class="cat-head"><span class="cat-num">' + String(i + 1).padStart(2, "0") + '</span><h2>' + c.name + '</h2><span class="mult">' + fmt(c.mult) + '× multiplier</span></div>' +
-      (c.explain ? '<p class="explain">' + c.explain + "</p>" : "") +
-      '<div class="levels" role="group" aria-label="' + c.name + ' rubric">' + levels + "</div>" +
-      '<div class="adjust"><span>Site score</span><span class="stepper"><button type="button" data-step="-1" aria-label="Lower ' + c.name + ' score">−</button><output id="out-' + c.key + '">–</output><button type="button" data-step="1" aria-label="Raise ' + c.name + ' score">+</button></span>' +
-      '<button type="button" class="linkish" data-clear>Clear</button><span class="weighted" id="w-' + c.key + '">– / ' + fmt(c.mult * 10) + "</span></div>" +
-      '<div class="notes"><label for="n-' + c.key + '" class="eyebrow" style="display:block;margin-bottom:4px">Observations</label><textarea id="n-' + c.key + '" rows="1" placeholder="Notes, evidence, recommended corrective actions"></textarea></div>';
-    catsEl.appendChild(el);
+    el.className = "cat"; el.id = "d-" + d.code;
+    var html = '<div class="cat-head"><span class="cat-num">' + d.code + '</span><h2>' + esc(d.name) + '</h2><span class="mult">' + d.weight + '% weight</span><span class="dom-score" id="ds-' + d.code + '"></span></div>';
+    html += d.phase ? '<span class="phase">' + d.phase + "</span>" : '<span class="phase">Verified with: ' + esc(d.with) + "</span>";
+    if (d.explain) html += '<p class="explain">' + esc(d.explain) + "</p>";
+    d.items.forEach(function (it, i) {
+      var k = key(d, i);
+      html += '<div class="item" data-k="' + k + '"><div class="item-head"><h3>' + esc(it[0]) + '</h3><span class="verify">Verify by: ' + esc(it[4]) + "</span></div>" +
+        '<div class="anchors" role="group" aria-label="' + esc(it[0]) + ' anchors">' +
+        [0, 5, 10].map(function (v, j) { return '<button type="button" class="level" data-v="' + v + '"><span class="v">' + v + "</span><span>" + esc(it[j + 1]) + "</span></button>"; }).join("") + "</div>" +
+        '<div class="adjust"><span class="stepper"><button type="button" data-step="-1" aria-label="Lower ' + esc(it[0]) + '">−</button><output id="o-' + k + '">–</output><button type="button" data-step="1" aria-label="Raise ' + esc(it[0]) + '">+</button></span>' +
+        '<span class="seg" role="group" aria-label="Evidence level">' + EV_ORDER.map(function (e) { return '<button type="button" data-ev="' + e + '">' + EV[e].label + "</button>"; }).join("") + "</span>" +
+        '<button type="button" class="linkish" data-clear>Clear</button><span class="weighted" id="w-' + k + '"></span></div></div>';
+    });
+    (d.caps || []).forEach(function (c, ci) {
+      html += '<label class="cap" id="cap-' + d.code + "-" + ci + '"><input type="checkbox" data-cap="' + d.code + "." + ci + '"><span><b>Cap:</b> ' + esc(c.text) + " → " +
+        (c.item != null ? "“" + esc(d.items[c.item][0]) + "” max " + c.rating : "domain max " + c.max + "%") + "</span></label>";
+    });
+    html += '<div class="notes"><label for="n-' + d.code + '" class="eyebrow" style="display:block;margin-bottom:4px">Observations</label><textarea id="n-' + d.code + '" rows="1" placeholder="Evidence reviewed, findings, recommended corrective actions"></textarea></div>';
+    el.innerHTML = html;
+    $("panel-" + d.group).appendChild(el);
 
     el.addEventListener("click", function (e) {
-      var a = cur(), lv = e.target.closest(".level"), st = e.target.closest("[data-step]");
-      if (lv) setScore(c.key, +lv.dataset.v);
-      else if (st) {
-        var v = a.scores[c.key];
-        v = v == null ? (+st.dataset.step > 0 ? 1 : 0) : Math.max(0, Math.min(10, v + +st.dataset.step));
-        setScore(c.key, v);
-      } else if (e.target.closest("[data-clear]")) setScore(c.key, null);
+      var itEl = e.target.closest(".item"); if (!itEl) return;
+      var k = itEl.dataset.k, a = cur(), v = a.items[k] || (a.items[k] = { r: null, e: "S" });
+      var lv = e.target.closest(".level"), st = e.target.closest("[data-step]"), ev = e.target.closest("[data-ev]");
+      if (lv) v.r = +lv.dataset.v;
+      else if (st) v.r = v.r == null ? (+st.dataset.step > 0 ? 1 : 0) : Math.max(0, Math.min(10, v.r + +st.dataset.step));
+      else if (ev) v.e = ev.dataset.ev;
+      else if (e.target.closest("[data-clear]")) v.r = null;
+      else return;
+      touch(); render();
     });
-    el.querySelector("textarea").addEventListener("input", function (e) { cur().notes[c.key] = e.target.value; touch(); });
+    el.addEventListener("change", function (e) {
+      if (e.target.dataset.cap) { cur().caps[e.target.dataset.cap] = e.target.checked; touch(); render(); }
+    });
+    el.querySelector("textarea").addEventListener("input", function (e) { cur().notes[d.code] = e.target.value; touch(); });
+  });
+  $("n-GAP").addEventListener("input", function (e) { cur().notes.GAP = e.target.value; touch(); });
+  GAP_FIELDS.forEach(function (f) {
+    $("g-" + f).addEventListener("input", function (e) { (cur().gap = cur().gap || {})[f] = e.target.value === "" ? "" : +e.target.value; touch(); render(); });
   });
 
-  // Ledger rows + bars
-  var lb = $("ledgerBody"), bars = $("bars");
-  CATS.forEach(function (c) {
+  // Ledger rows
+  var lb = $("ledgerBody");
+  ["S", "P"].forEach(function (g) {
     var tr = document.createElement("tr");
-    tr.innerHTML = '<td><a href="#cat-' + c.key + '">' + c.name.replace(" / Law Enforcement", "").replace("Active Shooter Response ", "") + '</a></td><td class="n" id="ls-' + c.key + '"></td><td class="n">' + fmt(c.mult) + '</td><td class="n" id="lt-' + c.key + '"></td><td class="n">' + fmt(c.mult * 10) + "</td>";
-    lb.appendChild(tr);
-    var b = document.createElement("span"); b.id = "b-" + c.key; b.style.flexGrow = c.mult; b.title = c.name; bars.appendChild(b);
+    tr.innerHTML = '<td colspan="4" class="eyebrow" style="padding-top:10px">' + GROUPS[g] + "</td>"; lb.appendChild(tr);
+    DOMAINS.filter(function (d) { return d.group === g; }).forEach(function (d) {
+      var r = document.createElement("tr");
+      r.innerHTML = '<td><a href="#d-' + d.code + '" data-goto="' + d.group + '">' + d.code + " " + esc(d.short) + '</a></td><td class="n">' + d.weight + '</td><td class="n" id="ls-' + d.code + '"></td><td class="n" id="lp-' + d.code + '"></td>';
+      lb.appendChild(r);
+    });
+  });
+  document.addEventListener("click", function (e) {
+    var g = e.target.closest("[data-goto]"); if (g) setTab(g.dataset.goto);
   });
 
-  function setScore(k, v) { cur().scores[k] = v; touch(); render(); }
-  function touch() { cur().updated = Date.now(); save(); }
-
-  function compute(a) {
-    var total = 0, scored = 0, rows = CATS.map(function (c) {
-      var v = a.scores[c.key], w = v == null ? null : v * c.mult;
-      if (v != null) { total += w; scored++; }
-      return { c: c, v: v, w: w, gap: c.mult * 10 - (w || 0) };
-    });
-    return { rows: rows, total: total, scored: scored, pct: total / MAX * 100 };
+  // Tabs
+  function setTab(t) {
+    db.tab = t; save();
+    document.querySelectorAll(".tab").forEach(function (b) { b.setAttribute("aria-selected", b.dataset.tab === t); });
+    document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== t; });
   }
+  document.querySelectorAll(".tab").forEach(function (b) { b.addEventListener("click", function () { setTab(b.dataset.tab); }); });
 
   function render() {
-    var a = cur(), r = compute(a);
-    ["school", "district", "assessor", "date"].forEach(function (f) {
-      var el = $("f-" + f); if (document.activeElement !== el) el.value = a[f] || "";
-    });
-    r.rows.forEach(function (row) {
-      var k = row.c.key, el = $("cat-" + k);
-      el.querySelectorAll(".level").forEach(function (b) {
-        var on = row.v != null && +b.dataset.v === row.v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on);
+    var a = cur();
+    ["school", "district", "assessor", "date"].forEach(function (f) { var el = $("f-" + f); if (document.activeElement !== el) el.value = a[f] || ""; });
+    var lost = [];
+    ["S", "P"].forEach(function (g) {
+      var gs = groupScore(a, g), b = band(gs.pct, gs.rated > 0);
+      $("pct-" + g).innerHTML = Math.round(gs.pct) + "<small>%</small>";
+      $("sub-" + g).textContent = gs.rated + " of " + gs.n + " sub-items rated";
+      $("meter-" + g).style.width = gs.pct + "%";
+      var be = $("band-" + g); be.textContent = b[0]; be.className = "band " + b[1];
+      $("tabn-" + g).textContent = Math.round(gs.pct) + "%";
+      gs.doms.forEach(function (x) {
+        var d = x.d;
+        $("ds-" + d.code).innerHTML = Math.round(x.pct) + "%" + (x.capNote.length ? " <small>capped</small>" : "") + " <small>" + x.rated + "/" + x.n + "</small>";
+        $("ls-" + d.code).textContent = x.rated ? Math.round(x.pct) + "%" : "–";
+        $("lp-" + d.code).textContent = fmt(x.pts);
+        lost.push({ d: d, lost: d.weight - x.pts, rated: x.rated });
+        x.rows.forEach(function (row, i) {
+          var k = key(d, i), el = document.querySelector('[data-k="' + k + '"]');
+          var anc = row.r == null ? null : anchorFor(row.r);
+          el.querySelectorAll(".level").forEach(function (btn, j) {
+            var on = anc === j + 1, near = row.r != null && !anc && Math.abs(+btn.dataset.v - row.r) <= 2;
+            btn.classList.toggle("on", on); btn.classList.toggle("near", near); btn.setAttribute("aria-pressed", on);
+          });
+          el.querySelectorAll("[data-ev]").forEach(function (b2) { b2.setAttribute("aria-pressed", row.r != null && b2.dataset.ev === row.e); });
+          $("o-" + k).textContent = row.r == null ? "–" : row.r;
+          $("w-" + k).textContent = row.r == null ? "Not rated" : (row.eff !== row.r ? row.r + "→" + row.eff : row.eff) + " × " + EV[row.e].m + " = " + fmt(row.pts) + " / 10";
+        });
+        (d.caps || []).forEach(function (c, ci) {
+          var on = !!a.caps[d.code + "." + ci], lab = $("cap-" + d.code + "-" + ci);
+          lab.classList.toggle("on", on); lab.querySelector("input").checked = on;
+        });
+        var ta = $("n-" + d.code); if (document.activeElement !== ta) ta.value = a.notes[d.code] || "";
       });
-      $("out-" + k).textContent = row.v == null ? "–" : row.v;
-      $("w-" + k).textContent = (row.w == null ? "–" : fmt(row.w)) + " / " + fmt(row.c.mult * 10) + " pts";
-      var ta = $("n-" + k); if (document.activeElement !== ta) ta.value = a.notes[k] || "";
-      $("ls-" + k).innerHTML = row.v == null ? '<span class="dash">–</span>' : row.v;
-      $("lt-" + k).innerHTML = row.w == null ? '<span class="dash">–</span>' : fmt(row.w);
-      var b = $("b-" + k); b.classList.toggle("empty", row.v == null); b.style.height = (row.v || 0) * 10 + "%";
     });
-    $("pct").innerHTML = Math.round(r.pct) + "<small>%</small>";
-    $("total").textContent = fmt(r.total);
-    $("scored").textContent = r.scored;
-    $("ledgerTotal").textContent = fmt(r.total);
-    $("meter").style.width = r.pct + "%";
+    var nt = $("n-GAP"); if (document.activeElement !== nt) nt.value = a.notes.GAP || "";
+    GAP_FIELDS.forEach(function (f) { var el = $("g-" + f); if (document.activeElement !== el) el.value = a.gap && a.gap[f] !== undefined ? a.gap[f] : ""; });
+    var gp = gapCalc(a);
+    [["typ", "Typical"], ["worst", "Worst-case"]].forEach(function (p) {
+      var el = $("gap-" + p[0]);
+      if (!gp) { el.textContent = "–"; el.className = ""; $("gap-" + p[0] + "-n").textContent = "Enter all five times"; return; }
+      el.textContent = (gp[p[0]] > 0 ? "+" : "") + fmt(gp[p[0]]) + " min"; el.className = gp[p[0]] > 0 ? "pos" : "neg";
+      $("gap-" + p[0] + "-n").textContent = gapText(gp[p[0]]);
+    });
+    $("gap-side").textContent = gp ? "Typical " + (gp.typ > 0 ? "+" : "") + fmt(gp.typ) + " min · Worst case " + (gp.worst > 0 ? "+" : "") + fmt(gp.worst) + " min" : "Not calculated";
 
-    var gaps = r.rows.filter(function (x) { return x.gap > 0; }).sort(function (x, y) { return y.gap - x.gap; }).slice(0, 4);
-    $("gaps").innerHTML = gaps.length ? gaps.map(function (g) {
-      return "<li><b>−" + fmt(g.gap) + '</b><a class="linkish" href="#cat-' + g.c.key + '">' + g.c.name + "</a>" + (g.v == null ? ' <span class="dash">(not rated)</span>' : "") + "</li>";
-    }).join("") : "<li>Every area is at its maximum rating.</li>";
-
+    lost.sort(function (x, y) { return y.lost - x.lost; });
+    $("gaps").innerHTML = lost.slice(0, 5).map(function (g) {
+      return "<li><b>−" + fmt(g.lost) + '</b><a class="linkish" href="#d-' + g.d.code + '" data-goto="' + g.d.group + '">' + g.d.code + " " + esc(g.d.name) + "</a>" + (g.rated ? "" : ' <span class="dash">(not rated)</span>') + "</li>";
+    }).join("");
     $("sampleBanner").hidden = a.id !== SAMPLE_ID;
     renderPicker();
   }
@@ -527,16 +724,14 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
   function label(a) { return (a.school || "Untitled assessment") + (a.date ? " · " + a.date : ""); }
   function renderPicker() {
     var p = $("picker"), ids = Object.keys(db.list).sort(function (x, y) { return db.list[y].updated - db.list[x].updated; });
-    p.innerHTML = ids.map(function (id) {
-      var opt = document.createElement("option"); opt.value = id; opt.textContent = label(db.list[id]); if (id === db.current) opt.selected = true; return opt.outerHTML;
-    }).join("");
+    p.innerHTML = ids.map(function (id) { return '<option value="' + id + '"' + (id === db.current ? " selected" : "") + ">" + esc(label(db.list[id])) + "</option>"; }).join("");
   }
 
   ["school", "district", "assessor", "date"].forEach(function (f) {
     $("f-" + f).addEventListener("input", function (e) { cur()[f] = e.target.value; touch(); renderPicker(); });
   });
   $("picker").addEventListener("change", function (e) { db.current = e.target.value; save(); render(); });
-  function startNew() { var a = blank(); db.list[a.id] = a; db.current = a.id; save(); render(); window.scrollTo(0, 0); $("f-school").focus(); toast("New assessment started"); }
+  function startNew() { var a = blank(); db.list[a.id] = a; db.current = a.id; save(); setTab("S"); render(); window.scrollTo(0, 0); $("f-school").focus(); toast("New assessment started"); }
   $("newBtn").addEventListener("click", startNew);
   $("sampleNew").addEventListener("click", startNew);
   $("dupBtn").addEventListener("click", function () {
@@ -552,17 +747,25 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     db.current = ids[0]; save(); $("delBtn").hidden = false; $("delConfirm").hidden = true; render(); toast("Assessment deleted");
   });
 
+  function anchorText(it, r) {
+    if (r == null) return "Not rated.";
+    if (r === 0) return it[1]; if (r === 5) return it[2]; if (r === 10) return it[3];
+    return r < 5 ? "Between 0 (" + it[1] + ") and 5 (" + it[2] + ")." : "Between 5 (" + it[2] + ") and 10 (" + it[3] + ").";
+  }
   function summary() {
-    var a = cur(), r = compute(a), lines = [
-      "Baseline Violent Critical Incident Preparedness Assessment",
+    var a = cur(), lines = ["Baseline VCI Readiness Assessment (v2)",
       "School: " + (a.school || "—") + (a.district ? " (" + a.district + ")" : ""),
-      "Assessor: " + (a.assessor || "—") + "   Date: " + (a.date || "—"),
-      "Score: " + Math.round(r.pct) + "% (" + fmt(r.total) + " of " + MAX + " points; " + r.scored + " of 11 areas rated)", ""
-    ];
-    r.rows.forEach(function (x) {
-      lines.push(x.c.name + ": " + (x.v == null ? "not rated" : x.v + " × " + fmt(x.c.mult) + " = " + fmt(x.w)) + " / " + fmt(x.c.mult * 10) +
-        (a.notes[x.c.key] ? "\n   Notes: " + a.notes[x.c.key] : ""));
+      "Assessor: " + (a.assessor || "—") + "   Date: " + (a.date || "—")];
+    ["S", "P"].forEach(function (g) {
+      var gs = groupScore(a, g), b = band(gs.pct, gs.rated > 0);
+      lines.push("", GROUPS[g] + ": " + Math.round(gs.pct) + "% (" + b[0] + "; " + gs.rated + " of " + gs.n + " sub-items rated)");
+      gs.doms.forEach(function (x) {
+        lines.push("  " + x.d.code + " " + x.d.name + " (" + x.d.weight + "%): " + Math.round(x.pct) + "%" + (x.capNote.length ? " [" + x.capNote.join("; ") + "]" : ""));
+        if (a.notes[x.d.code]) lines.push("     Notes: " + a.notes[x.d.code]);
+      });
     });
+    var gp = gapCalc(a);
+    lines.push("", "Delay gap: " + (gp ? "typical " + fmt(gp.typ) + " min, worst case " + fmt(gp.worst) + " min" : "not calculated"));
     return lines.join("\n");
   }
   function onAll(cls, fn) { document.querySelectorAll("." + cls).forEach(function (b) { b.addEventListener("click", fn); }); }
@@ -577,120 +780,149 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("Summary copied"); }, fallback);
     else fallback();
   });
+
+  function saveFile(name, blob) {
+    if (downloads) {
+      return downloads.save({ filename: name, data: blob }).then(function () { toast("Saved " + name); }, function (e) {
+        if (e && e.code === "declined") return;
+        toast(e && e.code === "rate_limited" ? "A save is already waiting for your confirmation." : "Saving files is not available here.");
+      });
+    }
+    var link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = name;
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
+    toast("Saved " + name);
+  }
   function baseName(a) { return ((a.school || "assessment").replace(/[^\w-]+/g, "_").replace(/^_+|_+$/g, "") || "assessment") + (a.date ? "_" + a.date : ""); }
   onAll("act-json", function () {
     var a = cur(); saveFile(baseName(a) + ".json", new Blob([JSON.stringify(a, null, 2)], { type: "application/json" }));
   });
+  $("importFile").addEventListener("change", function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    f.text().then(function (t) {
+      var a = JSON.parse(t);
+      if (!a || a.version !== 2 || !a.items) throw new Error("bad");
+      a.id = uid(); a.updated = Date.now(); a.caps = a.caps || {}; a.notes = a.notes || {}; a.gap = a.gap || {};
+      db.list[a.id] = a; db.current = a.id; save(); render(); toast("Assessment imported");
+    }).catch(function () { toast("That file is not a v2 assessment. Choose a .json file exported from this version of the app."); });
+    e.target.value = "";
+  });
+  $("printBtn").addEventListener("click", function () { window.print(); });
   onAll("act-pdf", function () {
     if (!window.jspdf || !window.jspdf.jsPDF) { toast("The PDF tool did not load. Check your connection and reload the page."); return; }
-    try { var a = cur(); saveFile(baseName(a) + "_VCI_Report.pdf", buildPdf(a)); }
+    try { var a = cur(); saveFile(baseName(a) + "_VCI_Readiness_Report.pdf", buildPdf(a)); }
     catch (e) { toast("The PDF could not be created."); }
   });
 
   // ---- PDF report ----
   function ascii(t) {
-    return String(t == null ? "" : t).replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"')
-      .replace(/[\u2013\u2014\u2212]/g, "-").replace(/\u00D7/g, "x").replace(/\u00B7/g, "-").replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "");
-  }
-  function levelText(c, v) {
-    if (v == null) return "Not rated.";
-    var exact = c.levels.filter(function (l) { return l[0] === v; })[0];
-    if (exact) return exact[1] || "Guidance pending.";
-    var lo = c.levels.filter(function (l) { return l[0] < v; }).pop(), hi = c.levels.filter(function (l) { return l[0] > v; })[0];
-    return "Assessor score between rubric levels " + lo[0] + " and " + hi[0] + ".";
+    return String(t == null ? "" : t).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/→/g, "->")
+      .replace(/[–—−]/g, "-").replace(/×/g, "x").replace(/·/g, "-").replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "");
   }
   function buildPdf(a) {
-    var r = compute(a), doc = new window.jspdf.jsPDF({ unit: "pt", format: "letter" });
+    var doc = new window.jspdf.jsPDF({ unit: "pt", format: "letter" });
     var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 48, y = M;
-    var NAVY = [31, 58, 107], INK = [21, 23, 28], MUTED = [93, 98, 112], LINE = [226, 222, 211];
-    // Logo bars
-    doc.setFillColor.apply(doc, INK);
+    var NAVY = [31, 58, 107], INK = [21, 23, 28], MUTED = [93, 98, 112], LINE = [226, 222, 211], CRIT = [178, 59, 46], GOOD = [47, 122, 74];
+    function color(c) { doc.setTextColor(c[0], c[1], c[2]); }
+    function need(h) { if (y + h > H - 50) { doc.addPage(); y = M; } }
+    // Header
+    doc.setFillColor(INK[0], INK[1], INK[2]);
     [[0, 12], [7, 12], [14, 28], [21, 34], [28, 32], [35, 46]].forEach(function (b) { doc.rect(M + b[0], y + 46 - b[1], 4, b[1], "F"); });
     doc.rect(M - 2, y + 48, 44, 3, "F");
-    doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor.apply(doc, INK);
-    doc.text("Baseline Awareness", M + 56, y + 22);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
-    doc.text("BaselineAwareness.com", M + 56, y + 36);
-    doc.setFontSize(9); doc.text("Report generated " + today(), W - M, y + 22, { align: "right" });
+    doc.setFont("helvetica", "bold"); doc.setFontSize(16); color(INK); doc.text("Baseline Awareness", M + 56, y + 22);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); color(MUTED);
+    doc.text("BaselineAwareness.com", M + 56, y + 36); doc.text("Report generated " + today(), W - M, y + 22, { align: "right" });
     y += 80;
-    doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor.apply(doc, INK);
-    doc.text(doc.splitTextToSize("Violent Critical Incident Preparedness Assessment", W - 2 * M), M, y); y += 26;
-    // School block + score
+    doc.setFont("helvetica", "bold"); doc.setFontSize(18); color(INK); doc.text("VCI Readiness Assessment", M, y); y += 24;
     doc.setFontSize(10);
     [["School", a.school], ["District", a.district], ["Assessor", a.assessor], ["Assessment date", a.date]].forEach(function (f) {
-      doc.setFont("helvetica", "bold"); doc.setTextColor.apply(doc, MUTED); doc.text(f[0].toUpperCase(), M, y);
-      doc.setFont("helvetica", "normal"); doc.setTextColor.apply(doc, INK); doc.text(ascii(f[1] || "-"), M + 118, y); y += 16;
+      doc.setFont("helvetica", "bold"); color(MUTED); doc.text(f[0].toUpperCase(), M, y);
+      doc.setFont("helvetica", "normal"); color(INK); doc.text(ascii(f[1] || "-"), M + 118, y); y += 15;
     });
-    doc.setFont("helvetica", "bold"); doc.setFontSize(44); doc.setTextColor.apply(doc, NAVY);
-    doc.text(Math.round(r.pct) + "%", W - M, y - 30, { align: "right" });
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor.apply(doc, MUTED);
-    doc.text(fmt(r.total) + " of " + MAX + " points  |  " + r.scored + " of 11 areas rated", W - M, y - 12, { align: "right" });
-    y += 4; doc.setFillColor.apply(doc, LINE); doc.rect(M, y, W - 2 * M, 6, "F");
-    doc.setFillColor.apply(doc, NAVY); doc.rect(M, y, (W - 2 * M) * Math.min(1, r.pct / 100), 6, "F"); y += 24;
-    // Scoring sheet
-    doc.autoTable({
-      startY: y, margin: { left: M, right: M },
-      head: [["Area", "Site score", "Multiplier", "Total", "Max"]],
-      body: r.rows.map(function (x) { return [ascii(x.c.name), x.v == null ? "-" : String(x.v), fmt(x.c.mult), x.w == null ? "-" : fmt(x.w), fmt(x.c.mult * 10)]; }),
-      foot: [["Totals", "", "13.5", fmt(r.total), String(MAX)]],
-      styles: { font: "helvetica", fontSize: 9.5, cellPadding: 5, textColor: INK, lineColor: LINE, lineWidth: 0.5 },
-      headStyles: { fillColor: NAVY, textColor: 255 }, footStyles: { fillColor: [231, 236, 245], textColor: INK, fontStyle: "bold" },
-      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
-      alternateRowStyles: { fillColor: [250, 248, 242] }
+    y += 12;
+    // Score boxes
+    var bw = (W - 2 * M - 16) / 2, gss = {};
+    ["S", "P"].forEach(function (g, i) {
+      var gs = gss[g] = groupScore(a, g), b = band(gs.pct, gs.rated > 0), x = M + i * (bw + 16);
+      doc.setDrawColor(LINE[0], LINE[1], LINE[2]); doc.roundedRect(x, y, bw, 92, 4, 4, "S");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10); color(MUTED); doc.text(GROUPS[g].toUpperCase(), x + 12, y + 18);
+      doc.setFontSize(36); color(NAVY); doc.text(Math.round(gs.pct) + "%", x + 12, y + 58);
+      doc.setFontSize(11); color(b[1] === "crit" ? CRIT : b[1] === "good" ? GOOD : INK); doc.text(b[0], x + bw - 12, y + 58, { align: "right" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); color(MUTED); doc.text(gs.rated + " of " + gs.n + " sub-items rated", x + 12, y + 78);
     });
-    y = doc.lastAutoTable.finalY + 22;
-    // Gaps
-    var gaps = r.rows.filter(function (x) { return x.gap > 0; }).sort(function (p, q) { return q.gap - p.gap; }).slice(0, 4);
-    if (gaps.length) {
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor.apply(doc, INK); doc.text("Largest point gaps", M, y); y += 15;
-      doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
-      gaps.forEach(function (g) { doc.text("-" + fmt(g.gap) + " pts   " + ascii(g.c.name) + (g.v == null ? " (not rated)" : ""), M + 8, y); y += 13; });
+    y += 104;
+    // Delay gap
+    var gp = gapCalc(a);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); color(INK); doc.text("Delay gap (reported, not scored)", M, y); y += 15;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+    if (gp) {
+      [["Typical", gp.typ], ["Worst case", gp.worst]].forEach(function (p) { color(p[1] > 0 ? CRIT : GOOD); doc.text(p[0] + ": " + (p[1] > 0 ? "+" : "") + fmt(p[1]) + " min  (" + ascii(gapText(p[1])) + ")", M + 8, y); y += 13; });
+      color(MUTED); doc.text("Alert " + a.gap.alert + " + arrival " + a.gap.typ + " / " + a.gap.worst + " + entry " + a.gap.entry + " - building delay " + a.gap.delay + " (minutes)", M + 8, y); y += 13;
+    } else { color(MUTED); doc.text("Not calculated. All five times are needed.", M + 8, y); y += 13; }
+    y += 10;
+    // Domain tables
+    ["S", "P"].forEach(function (g) {
+      doc.autoTable({
+        startY: y, margin: { left: M, right: M },
+        head: [[GROUPS[g], "Weight", "Rated", "Score", "Points"]],
+        body: gss[g].doms.map(function (x) { return [x.d.code + "  " + ascii(x.d.name) + (x.capNote.length ? "  (capped)" : ""), x.d.weight + "%", x.rated + "/" + x.n, Math.round(x.pct) + "%", fmt(x.pts)]; }),
+        foot: [["Total", "100%", "", "", fmt(gss[g].pct)]],
+        styles: { font: "helvetica", fontSize: 8.5, cellPadding: 3, textColor: INK, lineColor: LINE, lineWidth: 0.5 },
+        headStyles: { fillColor: NAVY, textColor: 255 }, footStyles: { fillColor: [231, 236, 245], textColor: INK, fontStyle: "bold" },
+        columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
+        alternateRowStyles: { fillColor: [250, 248, 242] }
+      });
+      y = doc.lastAutoTable.finalY + 10;
+    });
+    // Findings
+    ["S", "P"].forEach(function (g) {
+      doc.addPage(); y = M;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(14); color(INK); doc.text(GROUPS[g] + ": findings", M, y); y += 22;
+      gss[g].doms.forEach(function (x) {
+        need(60);
+        doc.setDrawColor(LINE[0], LINE[1], LINE[2]); doc.line(M, y - 10, W - M, y - 10);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11.5); color(INK); doc.text(x.d.code + "  " + ascii(x.d.name), M, y + 4);
+        color(NAVY); doc.text(Math.round(x.pct) + "%  (" + x.d.weight + "% weight)", W - M, y + 4, { align: "right" }); y += 18;
+        if (x.capNote.length) { doc.setFont("helvetica", "normal"); doc.setFontSize(9); color(CRIT); doc.text(ascii(x.capNote.join("; ")), M + 8, y); y += 13; }
+        x.rows.forEach(function (row) {
+          doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+          var txt = doc.splitTextToSize(ascii(anchorText(row.it, row.r)), W - 2 * M - 150);
+          doc.setFont("helvetica", "bold");
+          var nm = doc.splitTextToSize(ascii(row.it[0]), 122);
+          var h = Math.max(nm.length * 11 + 13, txt.length * 11 + 6);
+          need(h);
+          color(INK); doc.text(nm, M + 8, y);
+          doc.setFont("helvetica", "normal"); color(MUTED);
+          doc.text(row.r == null ? "Not rated" : row.r + "/10  " + EV[row.e].label, M + 8, y + nm.length * 11);
+          color(INK); doc.text(txt, M + 140, y);
+          y += h + 2;
+        });
+        if (a.notes[x.d.code]) {
+          doc.setFontSize(9); var nl = doc.splitTextToSize("Observations: " + ascii(a.notes[x.d.code]), W - 2 * M - 16);
+          need(nl.length * 11 + 4); color(MUTED); doc.text(nl, M + 8, y); y += nl.length * 11 + 4;
+        }
+        y += 14;
+      });
+    });
+    if (a.notes.GAP) {
+      need(40); doc.setFont("helvetica", "bold"); doc.setFontSize(11.5); color(INK); doc.text("Delay gap observations", M, y); y += 16;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9); var gl = doc.splitTextToSize(ascii(a.notes.GAP), W - 2 * M); color(MUTED); doc.text(gl, M, y);
     }
-    // Disclaimer
-    doc.setFontSize(8.5);
-    var disc = doc.splitTextToSize(ascii(document.querySelector(".disclaimer").textContent), W - 2 * M);
-    if (y + 12 + disc.length * 11 > H - 40) { doc.addPage(); y = M; }
-    doc.setTextColor.apply(doc, MUTED); doc.text(disc, M, Math.max(y + 12, H - 40 - disc.length * 11));
-    // Findings by area
-    doc.addPage(); y = M;
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor.apply(doc, INK); doc.text("Findings by area", M, y); y += 20;
-    r.rows.forEach(function (x, i) {
-      doc.setFontSize(9.5);
-      var body = doc.splitTextToSize(ascii(levelText(x.c, x.v)), W - 2 * M - 12);
-      var notes = a.notes[x.c.key] ? doc.splitTextToSize("Observations: " + ascii(a.notes[x.c.key]), W - 2 * M - 12) : [];
-      var need = 34 + (body.length + notes.length) * 12 + (notes.length ? 4 : 0);
-      if (y + need > H - M) { doc.addPage(); y = M; }
-      doc.setDrawColor.apply(doc, LINE); doc.line(M, y - 10, W - M, y - 10);
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor.apply(doc, INK);
-      doc.text((i + 1) + ". " + ascii(x.c.name), M, y + 4);
-      doc.setTextColor.apply(doc, NAVY);
-      doc.text((x.v == null ? "Not rated" : x.v + "/10  x" + fmt(x.c.mult) + " = " + fmt(x.w) + " of " + fmt(x.c.mult * 10)), W - M, y + 4, { align: "right" });
-      y += 20; doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor.apply(doc, INK);
-      doc.text(body, M + 12, y); y += body.length * 12;
-      if (notes.length) { y += 4; doc.setTextColor.apply(doc, MUTED); doc.text(notes, M + 12, y); y += notes.length * 12; }
-      y += 16;
-    });
-    // Footers
+    // Method and disclaimer close the report
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); color(MUTED);
+    var ev = "Evidence multipliers: Verified 1.0, Documented 0.9, Self-reported 0.8. Bands: 0-39 Critical gaps, 40-59 Developing, 60-79 Established, 80-100 Advanced.";
+    var foot = doc.splitTextToSize(ev, W - 2 * M).concat([""], doc.splitTextToSize(ascii(document.querySelector(".disclaimer").textContent), W - 2 * M));
+    y += 16; need(foot.length * 10); doc.text(foot, M, y);
     var n = doc.getNumberOfPages();
     for (var pg = 1; pg <= n; pg++) {
-      doc.setPage(pg); doc.setFontSize(8); doc.setTextColor.apply(doc, MUTED);
-      doc.text(ascii((a.school || "Untitled assessment") + " - Baseline VCI Preparedness Assessment"), M, H - 24);
+      doc.setPage(pg); doc.setFontSize(8); color(MUTED);
+      doc.text(ascii((a.school || "Untitled assessment") + " - Baseline VCI Readiness Assessment v2"), M, H - 24);
       doc.text("Page " + pg + " of " + n, W - M, H - 24, { align: "right" });
     }
     return doc.output("blob");
   }
-  $("importFile").addEventListener("change", function (e) {
-    var f = e.target.files[0]; if (!f) return;
-    f.text().then(function (t) {
-      var a = JSON.parse(t); if (!a || !a.scores) throw new Error("bad");
-      a.id = uid(); a.updated = Date.now(); a.notes = a.notes || {};
-      db.list[a.id] = a; db.current = a.id; save(); render(); toast("Assessment imported");
-    }).catch(function () { toast("That file is not a saved assessment. Choose a .json file exported from this app."); });
-    e.target.value = "";
-  });
-  $("printBtn").addEventListener("click", function () { window.print(); });
 
-  load(); render();
+  load(); setTab(db.tab); render();
 
   // ---- Intro splash (once per browser session) ----
   var splash = $("splash"), vid = $("introVideo");
