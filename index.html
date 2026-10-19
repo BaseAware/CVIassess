@@ -11,7 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
-/* Layout: assessor worksheet. Tabbed rubric column on the left (School, Public Safety, Delay gap), sticky score ledger on the right with both scores. */
+/* Layout: assessor worksheet. Tabbed rubric column on the left (School, Public Safety), sticky score ledger on the right with both scores. */
 :root {
   --paper: #faf8f2;
   --surface: #ffffff;
@@ -219,6 +219,8 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
 .seg button { border: 0; background: transparent; padding: 5px 10px; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--muted); }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-pressed="true"] { background: var(--navy); color: var(--paper); }
+.comment textarea { width: 100%; min-height: 34px; resize: vertical; border: 1px solid var(--line); border-radius: var(--r); background: var(--paper); padding: 6px 10px; font-size: 13px; }
+.comment label { position: absolute; left: -9999px; }
 .cap { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--ink); background: var(--paper); border: 1px dashed var(--line); border-radius: var(--r); padding: 8px 10px; cursor: pointer; }
 .cap input { margin-top: 3px; accent-color: var(--crit); }
 .cap.on { border-color: var(--crit); border-style: solid; }
@@ -233,17 +235,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
 .score-block .pct { font-size: 46px; }
 .score-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .score-top b { font-size: 14px; }
-.gap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-.gap-grid label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-.gap-grid input { border: 1px solid var(--line); background: var(--paper); border-radius: var(--r); padding: 8px 10px; font: 500 15px var(--font-data); width: 100%; min-width: 0; }
-.gap-grid small { font-size: 11px; }
-.gap-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.gap-out div { border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: grid; gap: 2px; background: var(--paper); }
-.gap-out b { font: 600 28px var(--font-data); }
-.gap-out b.pos { color: var(--crit); }
-.gap-out b.neg { color: var(--good); }
-.gap-out span { font-size: 12px; color: var(--muted); }
-.formula { font: 13px var(--font-data); color: var(--muted); background: var(--paper); border-radius: var(--r); padding: 10px 12px; overflow-x: auto; }
 @media (max-width: 720px) {
   .anchors { grid-template-columns: minmax(0, 1fr); }
 }
@@ -307,7 +298,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" type="button" data-tab="S" id="tab-S">School Readiness<small id="tabn-S"></small></button>
         <button class="tab" role="tab" type="button" data-tab="P" id="tab-P">Public Safety Readiness<small id="tabn-P"></small></button>
-        <button class="tab" role="tab" type="button" data-tab="G" id="tab-G">Delay gap</button>
       </div>
 
       <div class="cats" data-panel="S" id="panel-S">
@@ -316,28 +306,9 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       <div class="cats" data-panel="P" id="panel-P" hidden>
         <p class="tab-lead">Six domains scored with the police, fire, EMS and dispatch agencies that serve the campus. They never lower the School Readiness score.</p>
       </div>
-      <div class="cats" data-panel="G" id="panel-G" hidden>
-        <section class="cat">
-          <div class="cat-head"><h2>Delay gap</h2><span class="mult">Reported, not scored</span></div>
-          <p class="explain">How many minutes an attacker would be inside before responders could enter. It is shown at the typical and the worst-case response time, so a long drive alone never lowers a score.</p>
-          <div class="formula">Gap = (alert-to-911 + dispatch-to-arrival + arrival-to-entry) − building delay</div>
-          <div class="gap-grid">
-            <label for="g-alert">Alert-to-911 (min)<input id="g-alert" type="number" min="0" step="0.25" inputmode="decimal"><small>From S6 panic alert test or drill timing</small></label>
-            <label for="g-typ">Dispatch-to-arrival, typical (min)<input id="g-typ" type="number" min="0" step="0.25" inputmode="decimal"><small>From P1 dispatch records</small></label>
-            <label for="g-worst">Dispatch-to-arrival, worst case (min)<input id="g-worst" type="number" min="0" step="0.25" inputmode="decimal"><small>90th percentile, from P1</small></label>
-            <label for="g-entry">Arrival-to-entry (min)<input id="g-entry" type="number" min="0" step="0.25" inputmode="decimal"><small>Timed in an exercise, P1</small></label>
-            <label for="g-delay">Building delay (min)<input id="g-delay" type="number" min="0" step="0.25" inputmode="decimal"><small>Perimeter and glazing forced-entry delay, S3</small></label>
-          </div>
-          <div class="gap-out">
-            <div><span>Typical gap</span><b id="gap-typ">–</b><span id="gap-typ-n"></span></div>
-            <div><span>Worst-case gap</span><b id="gap-worst">–</b><span id="gap-worst-n"></span></div>
-          </div>
-          <div class="notes"><label for="n-GAP" class="eyebrow" style="display:block;margin-bottom:4px">Observations</label><textarea id="n-GAP" rows="2" placeholder="Data sources, assumptions, and what would close the gap"></textarea></div>
-        </section>
-      </div>
 
       <div class="export-bar no-print">
-        <div><b>Finished with this assessment?</b><span>Export a PDF report with both scores, the delay gap and every finding.</span></div>
+        <div><b>Finished with this assessment?</b><span>Export a PDF report with both scores and every finding and comment.</span></div>
         <div class="toolbar">
           <button class="btn primary act-pdf dl-only" type="button">Export PDF</button>
           <button class="btn act-json dl-only" type="button">Export JSON</button>
@@ -357,9 +328,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
           <div class="score-top"><b>Public Safety Readiness</b><span class="band none" id="band-P">Not rated</span></div>
           <div class="score-row"><div class="pct" id="pct-P">0<small>%</small></div><div class="score-sub" id="sub-P"></div></div>
           <div class="meter"><i id="meter-P"></i></div>
-        </div>
-        <div class="score-block">
-          <div class="score-top"><b>Delay gap</b><span class="score-sub" id="gap-side">Not calculated</span></div>
         </div>
       </div>
 
@@ -498,7 +466,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
   var EV = { V: { label: "Verified", m: 1 }, D: { label: "Documented", m: 0.9 }, S: { label: "Self-reported", m: 0.8 } };
   var EV_ORDER = ["V", "D", "S"];
   var BANDS = [[80, "Advanced", "good"], [60, "Established", "good"], [40, "Developing", "warn"], [0, "Critical gaps", "crit"]];
-  var GAP_FIELDS = ["alert", "typ", "worst", "entry", "delay"];
   var STORE = "baseline-vci-v2";
   var SAMPLE_ID = "sample";
   var byCode = {}; DOMAINS.forEach(function (d) { byCode[d.code] = d; });
@@ -524,7 +491,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
   function band(p, any) { if (!any) return ["Not rated", "none"]; for (var i = 0; i < BANDS.length; i++) if (p >= BANDS[i][0]) return [BANDS[i][1], BANDS[i][2]]; }
 
   function blank() {
-    return { version: 2, id: uid(), school: "", district: "", assessor: "", date: today(), items: {}, caps: {}, notes: {}, gap: {}, updated: Date.now() };
+    return { version: 2, id: uid(), school: "", district: "", assessor: "", date: today(), items: {}, caps: {}, notes: {}, comments: {}, updated: Date.now() };
   }
   function sample() {
     var a = blank();
@@ -540,7 +507,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     Object.keys(r).forEach(function (c) { r[c].forEach(function (x, i) { a.items[c + "." + i] = { r: x[0], e: x[1] }; }); });
     a.caps["S3.0"] = true;
     a.notes.S3 = "Example note: side door B-4 found propped open during arrival.";
-    a.gap = { alert: 1, typ: 6, worst: 11, entry: 1.5, delay: 2 };
+    a.comments["S3.0"] = "Door B-4 propped with a wedge at 7:52 a.m.; prop alarm not installed on that door.";
     return a;
   }
 
@@ -549,13 +516,14 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     try { var raw = localStorage.getItem(STORE); if (raw) { var p = JSON.parse(raw); if (p && p.list) db = p; } } catch (e) {}
     if (!db.list || !Object.keys(db.list).length) { var s = sample(); db = { list: {}, current: s.id, tab: "S" }; db.list[s.id] = s; }
     if (!db.list[db.current]) db.current = Object.keys(db.list)[0];
-    if (!/^[SPG]$/.test(db.tab || "")) db.tab = "S";
+    if (!/^[SP]$/.test(db.tab || "")) db.tab = "S";
   }
   var saveTimer;
   function save() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(function () { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) {} }, 150);
   }
+  window.addEventListener("pagehide", function () { clearTimeout(saveTimer); try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) {} });
   function cur() { return db.list[db.current]; }
   function touch() { cur().updated = Date.now(); save(); }
 
@@ -590,13 +558,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     var rated = doms.reduce(function (s, x) { return s + x.rated; }, 0), n = doms.reduce(function (s, x) { return s + x.n; }, 0);
     return { doms: doms, pct: total, rated: rated, n: n };
   }
-  function gapCalc(a) {
-    var g = a.gap || {}, ok = GAP_FIELDS.every(function (f) { return g[f] !== "" && g[f] != null && !isNaN(+g[f]); });
-    if (!ok) return null;
-    var base = +g.alert + +g.entry - +g.delay;
-    return { typ: base + +g.typ, worst: base + +g.worst };
-  }
-  function gapText(m) { return m > 0 ? fmt(m) + " min inside before entry" : "Delay outlasts response by " + fmt(-m) + " min"; }
 
   // ---- Build domain cards once ----
   function anchorFor(v) { return v === 0 ? 1 : v === 5 ? 2 : v === 10 ? 3 : null; }
@@ -613,7 +574,8 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         [0, 5, 10].map(function (v, j) { return '<button type="button" class="level" data-v="' + v + '"><span class="v">' + v + "</span><span>" + esc(it[j + 1]) + "</span></button>"; }).join("") + "</div>" +
         '<div class="adjust"><span class="stepper"><button type="button" data-step="-1" aria-label="Lower ' + esc(it[0]) + '">−</button><output id="o-' + k + '">–</output><button type="button" data-step="1" aria-label="Raise ' + esc(it[0]) + '">+</button></span>' +
         '<span class="seg" role="group" aria-label="Evidence level">' + EV_ORDER.map(function (e) { return '<button type="button" data-ev="' + e + '">' + EV[e].label + "</button>"; }).join("") + "</span>" +
-        '<button type="button" class="linkish" data-clear>Clear</button><span class="weighted" id="w-' + k + '"></span></div></div>';
+        '<button type="button" class="linkish" data-clear>Clear</button><span class="weighted" id="w-' + k + '"></span></div>' +
+        '<div class="comment"><label for="c-' + k + '">Comments on ' + esc(it[0]) + '</label><textarea id="c-' + k + '" rows="1" data-comment="' + k + '" placeholder="Comments: evidence seen, finding, recommendation"></textarea></div></div>';
     });
     (d.caps || []).forEach(function (c, ci) {
       html += '<label class="cap" id="cap-' + d.code + "-" + ci + '"><input type="checkbox" data-cap="' + d.code + "." + ci + '"><span><b>Cap:</b> ' + esc(c.text) + " → " +
@@ -637,11 +599,11 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     el.addEventListener("change", function (e) {
       if (e.target.dataset.cap) { cur().caps[e.target.dataset.cap] = e.target.checked; touch(); render(); }
     });
-    el.querySelector("textarea").addEventListener("input", function (e) { cur().notes[d.code] = e.target.value; touch(); });
-  });
-  $("n-GAP").addEventListener("input", function (e) { cur().notes.GAP = e.target.value; touch(); });
-  GAP_FIELDS.forEach(function (f) {
-    $("g-" + f).addEventListener("input", function (e) { (cur().gap = cur().gap || {})[f] = e.target.value === "" ? "" : +e.target.value; touch(); render(); });
+    el.addEventListener("input", function (e) {
+      var t = e.target, a = cur();
+      if (t.dataset.comment) { (a.comments = a.comments || {})[t.dataset.comment] = t.value; touch(); }
+      else if (t.id === "n-" + d.code) { a.notes[d.code] = t.value; touch(); }
+    });
   });
 
   // Ledger rows
@@ -693,6 +655,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
           });
           el.querySelectorAll("[data-ev]").forEach(function (b2) { b2.setAttribute("aria-pressed", row.r != null && b2.dataset.ev === row.e); });
           $("o-" + k).textContent = row.r == null ? "–" : row.r;
+          var ce = $("c-" + k); if (document.activeElement !== ce) ce.value = (a.comments || {})[k] || "";
           $("w-" + k).textContent = row.r == null ? "Not rated" : (row.eff !== row.r ? row.r + "→" + row.eff : row.eff) + " × " + EV[row.e].m + " = " + fmt(row.pts) + " / 10";
         });
         (d.caps || []).forEach(function (c, ci) {
@@ -702,16 +665,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         var ta = $("n-" + d.code); if (document.activeElement !== ta) ta.value = a.notes[d.code] || "";
       });
     });
-    var nt = $("n-GAP"); if (document.activeElement !== nt) nt.value = a.notes.GAP || "";
-    GAP_FIELDS.forEach(function (f) { var el = $("g-" + f); if (document.activeElement !== el) el.value = a.gap && a.gap[f] !== undefined ? a.gap[f] : ""; });
-    var gp = gapCalc(a);
-    [["typ", "Typical"], ["worst", "Worst-case"]].forEach(function (p) {
-      var el = $("gap-" + p[0]);
-      if (!gp) { el.textContent = "–"; el.className = ""; $("gap-" + p[0] + "-n").textContent = "Enter all five times"; return; }
-      el.textContent = (gp[p[0]] > 0 ? "+" : "") + fmt(gp[p[0]]) + " min"; el.className = gp[p[0]] > 0 ? "pos" : "neg";
-      $("gap-" + p[0] + "-n").textContent = gapText(gp[p[0]]);
-    });
-    $("gap-side").textContent = gp ? "Typical " + (gp.typ > 0 ? "+" : "") + fmt(gp.typ) + " min · Worst case " + (gp.worst > 0 ? "+" : "") + fmt(gp.worst) + " min" : "Not calculated";
 
     lost.sort(function (x, y) { return y.lost - x.lost; });
     $("gaps").innerHTML = lost.slice(0, 5).map(function (g) {
@@ -761,11 +714,13 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       lines.push("", GROUPS[g] + ": " + Math.round(gs.pct) + "% (" + b[0] + "; " + gs.rated + " of " + gs.n + " sub-items rated)");
       gs.doms.forEach(function (x) {
         lines.push("  " + x.d.code + " " + x.d.name + " (" + x.d.weight + "%): " + Math.round(x.pct) + "%" + (x.capNote.length ? " [" + x.capNote.join("; ") + "]" : ""));
+        x.rows.forEach(function (row, i) {
+          var c = (a.comments || {})[key(x.d, i)];
+          lines.push("     - " + row.it[0] + ": " + (row.r == null ? "not rated" : row.r + "/10, " + EV[row.e].label) + (c ? ". " + c : ""));
+        });
         if (a.notes[x.d.code]) lines.push("     Notes: " + a.notes[x.d.code]);
       });
     });
-    var gp = gapCalc(a);
-    lines.push("", "Delay gap: " + (gp ? "typical " + fmt(gp.typ) + " min, worst case " + fmt(gp.worst) + " min" : "not calculated"));
     return lines.join("\n");
   }
   function onAll(cls, fn) { document.querySelectorAll("." + cls).forEach(function (b) { b.addEventListener("click", fn); }); }
@@ -802,7 +757,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     f.text().then(function (t) {
       var a = JSON.parse(t);
       if (!a || a.version !== 2 || !a.items) throw new Error("bad");
-      a.id = uid(); a.updated = Date.now(); a.caps = a.caps || {}; a.notes = a.notes || {}; a.gap = a.gap || {};
+      a.id = uid(); a.updated = Date.now(); a.caps = a.caps || {}; a.notes = a.notes || {}; a.comments = a.comments || {}; delete a.gap;
       db.list[a.id] = a; db.current = a.id; save(); render(); toast("Assessment imported");
     }).catch(function () { toast("That file is not a v2 assessment. Choose a .json file exported from this version of the app."); });
     e.target.value = "";
@@ -851,15 +806,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); color(MUTED); doc.text(gs.rated + " of " + gs.n + " sub-items rated", x + 12, y + 78);
     });
     y += 104;
-    // Delay gap
-    var gp = gapCalc(a);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(11); color(INK); doc.text("Delay gap (reported, not scored)", M, y); y += 15;
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
-    if (gp) {
-      [["Typical", gp.typ], ["Worst case", gp.worst]].forEach(function (p) { color(p[1] > 0 ? CRIT : GOOD); doc.text(p[0] + ": " + (p[1] > 0 ? "+" : "") + fmt(p[1]) + " min  (" + ascii(gapText(p[1])) + ")", M + 8, y); y += 13; });
-      color(MUTED); doc.text("Alert " + a.gap.alert + " + arrival " + a.gap.typ + " / " + a.gap.worst + " + entry " + a.gap.entry + " - building delay " + a.gap.delay + " (minutes)", M + 8, y); y += 13;
-    } else { color(MUTED); doc.text("Not calculated. All five times are needed.", M + 8, y); y += 13; }
-    y += 10;
     // Domain tables
     ["S", "P"].forEach(function (g) {
       doc.autoTable({
@@ -884,7 +830,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         doc.setFont("helvetica", "bold"); doc.setFontSize(11.5); color(INK); doc.text(x.d.code + "  " + ascii(x.d.name), M, y + 4);
         color(NAVY); doc.text(Math.round(x.pct) + "%  (" + x.d.weight + "% weight)", W - M, y + 4, { align: "right" }); y += 18;
         if (x.capNote.length) { doc.setFont("helvetica", "normal"); doc.setFontSize(9); color(CRIT); doc.text(ascii(x.capNote.join("; ")), M + 8, y); y += 13; }
-        x.rows.forEach(function (row) {
+        x.rows.forEach(function (row, ri) {
           doc.setFont("helvetica", "normal"); doc.setFontSize(9);
           var txt = doc.splitTextToSize(ascii(anchorText(row.it, row.r)), W - 2 * M - 150);
           doc.setFont("helvetica", "bold");
@@ -896,6 +842,11 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
           doc.text(row.r == null ? "Not rated" : row.r + "/10  " + EV[row.e].label, M + 8, y + nm.length * 11);
           color(INK); doc.text(txt, M + 140, y);
           y += h + 2;
+          var cm = (a.comments || {})[key(x.d, ri)];
+          if (cm) {
+            doc.setFontSize(8.5); var cl = doc.splitTextToSize("Comments: " + ascii(cm), W - 2 * M - 148);
+            need(cl.length * 10 + 4); color(MUTED); doc.text(cl, M + 140, y - 2); y += cl.length * 10 + 4;
+          }
         });
         if (a.notes[x.d.code]) {
           doc.setFontSize(9); var nl = doc.splitTextToSize("Observations: " + ascii(a.notes[x.d.code]), W - 2 * M - 16);
@@ -904,10 +855,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         y += 14;
       });
     });
-    if (a.notes.GAP) {
-      need(40); doc.setFont("helvetica", "bold"); doc.setFontSize(11.5); color(INK); doc.text("Delay gap observations", M, y); y += 16;
-      doc.setFont("helvetica", "normal"); doc.setFontSize(9); var gl = doc.splitTextToSize(ascii(a.notes.GAP), W - 2 * M); color(MUTED); doc.text(gl, M, y);
-    }
     // Method and disclaimer close the report
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); color(MUTED);
     var ev = "Evidence multipliers: Verified 1.0, Documented 0.9, Self-reported 0.8. Bands: 0-39 Critical gaps, 40-59 Developing, 60-79 Established, 80-100 Advanced.";

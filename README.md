@@ -7,7 +7,7 @@ Web app for the Baseline Awareness *Violent Critical Incident Readiness Assessme
 - Evidence multipliers: Verified 1.0, Documented 0.9, Self-reported 0.8
 - Caps for disqualifying conditions (domain or sub-item maximums)
 - Readiness bands: 0–39 Critical gaps, 40–59 Developing, 60–79 Established, 80–100 Advanced
-- Delay gap finding (typical and worst-case), reported but not scored
+- Comments box under every sub-item (included in the PDF and copied summary)
 - Observation notes per domain; saved assessments in the browser; duplicate, delete
 - PDF report export (top toolbar and bottom of the assessment), copy summary, JSON export/import, print
 - Brand intro video on first load (`assets/intro.mp4`)
