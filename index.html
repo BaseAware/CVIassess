@@ -301,7 +301,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       </div>
 
       <div class="cats" data-panel="S" id="panel-S">
-        <p class="tab-lead">Nine domains the school or district can fix. Prevention 30%, protection 50%, response 15%, recovery 5%.</p>
+        <p class="tab-lead">Ten domains the school or district can fix. Prevention 30%, protection 45%, response 15%, recovery 5%, improvement 5%.</p>
       </div>
       <div class="cats" data-panel="P" id="panel-P" hidden>
         <p class="tab-lead">Seven domains scored with the police, fire, EMS and dispatch agencies that serve the campus. They never lower the School Readiness score.</p>
@@ -392,12 +392,12 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         ["MOU and role", "No MOU", "MOU without defined roles", "MOU defines the immediate active-threat role, keeps the officer out of routine discipline, sets data-sharing rules; reviewed yearly", "MOU"],
         ["Integration", "Officer not in school plans", "Officer knows the plan", "Officer part of BTA team, joins drills, carries building access and a radio on the police channel", "Interviews, drill records"]],
       caps: [{ text: "No MOU between the school and the law enforcement agency", max: 50 }] },
-    { code: "S5", group: "S", phase: "Protection", weight: 25, name: "Emergency Training & Drills", short: "Training & Drills",
+    { code: "S5", group: "S", phase: "Protection", weight: 20, name: "Emergency Training & Drills", short: "Training & Drills",
       explain: "Drills follow trauma-informed practice. The drill day may be unannounced to students, but every alert says “this is a drill,” with no simulated attackers, gunfire or injuries.",
       items: [
         ["Options-based training", "Lockdown only", "Options discussed with staff", "All staff trained yearly in an options-based model (e.g., Run-Hide-Fight, Avoid-Deny-Defend); age-appropriate student instruction", "Curriculum, training logs"],
         ["Drill frequency and variety", "None", "1–2 lockdown drills a year", "3 or more a year at varied times (lunch, passing period, recess); at least one practices evacuation", "Drill log"],
-        ["Drill safety design", "Deceptive or high-sensory drills (blanks, actors, fake injuries, unannounced to staff)", "Announced drills, no debrief", "Staff notified ahead; students told it is a drill; stated learning goals; debrief and after-action notes; support for students with trauma histories", "Drill plans, after-action reports"],
+        ["Drill safety design", "Deceptive or high-sensory drills (blanks, actors, fake injuries, unannounced to staff)", "Announced drills, no debrief", "Staff notified ahead; students told it is a drill; stated learning goals; support for students with trauma histories", "Drill plans, after-action reports"],
         ["Access and functional needs (TEAMS)", "Not addressed", "Some individual plans; not all TEAMS areas covered", "Plans cover all five TEAMS areas (sensory, physical/mobility, cognitive/developmental, speech/language, social-emotional-behavioral); every student with an IEP or 504 plan has an individual emergency plan; visual and audible alerts; mobility evacuation equipment; aides assigned", "Plans, walk-through"],
         ["Staff coverage", "Teachers only, or none", "Teachers and admin", "All staff, including substitutes, aides, custodians, food service and bus drivers; online and in-person formats", "Training roster"],
         ["Tabletop exercise", "None", "Every 2–3 years", "Yearly, with police, fire and EMS", "Exercise records"]],
@@ -426,6 +426,14 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         ["Exercise", "Never", "Tabletop only", "Functional exercise every 2 years, including transport", "Exercise records"],
         ["Release accountability", "None", "Paper sign-out", "ID checked against authorized guardians; digital release record", "Demo"],
         ["Recovery", "None", "Counseling contacts listed", "Written mental health recovery plan; crisis communication templates; family assistance staff assigned", "Plan, templates"]] },
+    { code: "S10", group: "S", phase: "Improvement", weight: 5, name: "After-Action Review & Corrective Action", short: "After-Action & Corrective",
+      explain: "Covers drills, tabletops, exercises, reunification exercises and real incidents. Debriefs are non-punitive. Written records name roles, not individuals; districts should ask legal counsel how to keep them, since they may be subject to public records requests or discovery.",
+      items: [
+        ["Debrief practice", "None", "After major exercises only", "After every drill and exercise, with the people who actually performed the roles", "Drill log, attendance"],
+        ["Debrief quality", "Opinions only, nothing written", "Written notes", "Short written record based on what was observed; separates what worked from what did not", "Sample of 3 recent after-action records"],
+        ["Corrective action tracking", "Not tracked", "Gaps listed", "Each gap has an owner and a due date, in a log reviewed monthly or quarterly and carried into the next training cycle", "Corrective action log"],
+        ["Closure", "No follow-through", "Marked closed when someone says it is done", "Closed only when the fix is verified: procedure updated, equipment in place, or retested in a later drill", "Log, later drill records"]],
+      caps: [{ text: "The same gap appears in two consecutive after-action records with no corrective action", max: 50 }] },
 
     { code: "P1", group: "P", weight: 15, name: "Response Time Analysis & Planning", short: "Response Time Planning", with: "Police, dispatch",
       explain: "Response times vary with staffing, distance and other calls in progress. P1 does not reward a fast agency or penalize a rural one. It scores whether the agencies and the school know their realistic response window, including the worst case, and plan around it.",
@@ -507,7 +515,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
       S1: [[7, "D"], [5, "D"], [5, "S"], [3, "D"], [5, "S"]], S2: [[5, "D"], [5, "S"], [7, "V"], [5, "D"], [3, "S"]],
       S3: [[7, "V"], [5, "V"], [7, "V"], [3, "D"], [5, "V"]], S4: [[5, "D"], [7, "D"], [5, "D"], [7, "S"]],
       S5: [[7, "D"], [5, "D"], [7, "D"], [3, "S"], [5, "D"], [3, "D"]], S6: [[5, "V"], [5, "V"], [5, "V"], [3, "S"], [5, "V"]],
-      S7: [[3, "V"], [3, "D"], [0, "D"]], S8: [[3, "D"], [3, "V"], [5, "V"], [5, "D"]], S9: [[5, "D"], [3, "D"], [5, "S"], [3, "D"]],
+      S7: [[3, "V"], [3, "D"], [0, "D"]], S8: [[3, "D"], [3, "V"], [5, "V"], [5, "D"]], S9: [[5, "D"], [3, "D"], [5, "S"], [3, "D"]], S10: [[5, "D"], [3, "D"], [3, "S"], [0, "S"]],
       P1: [[5, "D"], [0, "S"], [3, "S"]], P2: [[7, "D"], [10, "D"], [5, "V"], [3, "S"]], P3: [[3, "D"], [5, "D"], [5, "V"], [3, "D"]],
       P4: [[5, "D"], [3, "D"], [5, "D"], [3, "S"]], P5: [[3, "D"], [5, "S"], [5, "D"], [3, "S"]], P6: [[5, "S"], [0, "S"], [0, "S"]], P7: [[5, "D"], [3, "S"], [5, "D"]]
     };
