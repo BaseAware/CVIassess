@@ -2,7 +2,7 @@
 
 Web app for the Baseline Awareness *Violent Critical Incident Readiness Assessment*, rubric v2.
 
-- **Two scores, never averaged:** School Readiness (S1–S9, what the school controls) and Public Safety Readiness (P1–P6, scored with police, fire, EMS and dispatch)
+- **Two scores, never averaged:** School Readiness (S1–S9, what the school controls) and Public Safety Readiness (P1–P7, scored with police, fire, EMS and dispatch)
 - Each sub-item rated 0–10 against anchors at 0, 5 and 10
 - Evidence multipliers: Verified 1.0, Documented 0.9, Self-reported 0.8
 - Caps for disqualifying conditions (domain or sub-item maximums)

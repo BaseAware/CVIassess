@@ -304,7 +304,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         <p class="tab-lead">Nine domains the school or district can fix. Prevention 30%, protection 50%, response 15%, recovery 5%.</p>
       </div>
       <div class="cats" data-panel="P" id="panel-P" hidden>
-        <p class="tab-lead">Six domains scored with the police, fire, EMS and dispatch agencies that serve the campus. They never lower the School Readiness score.</p>
+        <p class="tab-lead">Seven domains scored with the police, fire, EMS and dispatch agencies that serve the campus. They never lower the School Readiness score.</p>
       </div>
 
       <div class="export-bar no-print">
@@ -374,6 +374,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         ["Climate measurement", "None", "Student survey every 2 years", "Yearly student, staff and parent survey; results drive a written improvement plan", "Survey results, plan"],
         ["Connectedness", "No programs", "SEL or advisory for some students", "SEL for all students; every student has an identified trusted adult; student safety council", "Program records, student interviews"],
         ["Reporting access", "No anonymous channel", "One channel (phone or web), school hours only", "Anonymous app, web, text and phone; monitored 24/7; written triage time standard", "After-hours test tip, time to acknowledgement"],
+        ["Tip tracking", "Tips not tracked", "Tip count kept", "Volume, type and time to response tracked monthly and reviewed by the threat assessment team", "Tip log, team minutes"],
         ["Reporting trust", "Not measured", "Promoted See Something, Say Something campaign", "Survey measures willingness to report and belief that reports lead to help; reporters told their concern was handled", "Survey items, closure records"]],
       caps: [{ text: "A test tip sent after hours got no response within the triage standard", item: 2, rating: 3 }] },
     { code: "S3", group: "S", phase: "Protection", weight: 15, name: "Access Control & Delay", short: "Access Control & Delay",
@@ -381,7 +382,8 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         ["Perimeter doors", "Unlocked during the day", "All exterior doors locked; no prop alarms", "All locked; door-prop alarms monitored; daily door checks logged", "Walk the perimeter, alarm test"],
         ["Main entry and visitors", "Unlocked or unmonitored", "Locked with camera buzz-in; sign-in at office", "Secure vestibule; ID scanned and badge issued before entry to student areas", "Observe entry, test as visitor"],
         ["Classroom lockdown", "Rooms cannot lock", "Lock from inside with a key", "Every instructional space locks from inside without a key or stepping into the hall; locked during instruction", "Spot-check 10 rooms"],
-        ["Glazing delay", "Standard glass at entry and ground floor", "Film or rated glazing at main entry only", "Entry and ground-floor glazing forced-entry rated or tested; delay time documented", "Product specs, test records"]],
+        ["Glazing (doors, side-lites, vision panels)", "Standard glass at entry and ground floor", "Forced-entry rated glazing or film (e.g., ASTM F3561) at entry, side-lites and ground-floor vision panels", "Ballistic-rated glazing (e.g., UL 752) at entry, side-lites and ground-floor vision panels; delay time documented", "Product specs, test records"],
+        ["Barricade devices", "Non-compliant secondary barricade devices found in classrooms", "None found; no written district policy", "Written policy bars non-compliant devices; any classroom locking or barricade hardware approved in writing by the local fire marshal and meets ADA operating requirements", "Spot-check rooms, fire marshal approval"]],
       caps: [{ text: "An exterior door was found propped or unlocked during the assessment", max: 50 }] },
     { code: "S4", group: "S", phase: "Protection", weight: 10, name: "On-Site Security & SRO Integration", short: "SRO Integration",
       items: [
@@ -396,7 +398,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         ["Options-based training", "Lockdown only", "Options discussed with staff", "All staff trained yearly in an options-based model (e.g., Run-Hide-Fight, Avoid-Deny-Defend); age-appropriate student instruction", "Curriculum, training logs"],
         ["Drill frequency and variety", "None", "1–2 lockdown drills a year", "3 or more a year at varied times (lunch, passing period, recess); at least one practices evacuation", "Drill log"],
         ["Drill safety design", "Deceptive or high-sensory drills (blanks, actors, fake injuries, unannounced to staff)", "Announced drills, no debrief", "Staff notified ahead; students told it is a drill; stated learning goals; debrief and after-action notes; support for students with trauma histories", "Drill plans, after-action reports"],
-        ["Access and functional needs", "Not addressed", "Some individual plans", "Every student with a disability has an individual emergency plan; visual and audible alerts; mobility evacuation equipment; aides assigned", "Plans, walk-through"],
+        ["Access and functional needs (TEAMS)", "Not addressed", "Some individual plans; not all TEAMS areas covered", "Plans cover all five TEAMS areas (sensory, physical/mobility, cognitive/developmental, speech/language, social-emotional-behavioral); every student with an IEP or 504 plan has an individual emergency plan; visual and audible alerts; mobility evacuation equipment; aides assigned", "Plans, walk-through"],
         ["Staff coverage", "Teachers only, or none", "Teachers and admin", "All staff, including substitutes, aides, custodians, food service and bus drivers; online and in-person formats", "Training roster"],
         ["Tabletop exercise", "None", "Every 2–3 years", "Yearly, with police, fire and EMS", "Exercise records"]],
       caps: [{ text: "A deceptive or high-sensory drill was held in the last 12 months", max: 30 }] },
@@ -412,7 +414,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         ["Kits", "None", "Kits in office or nurse’s room", "Kits in every classroom and common area, mapped and inspected yearly", "Spot-check, inspection log"],
         ["Staff certified", "None", "Under 50% of staff", "80% or more of staff trained in Stop the Bleed within 2 years", "Training roster"],
         ["Plan integration", "Not in the plan", "In the written plan", "Bleeding control practiced in drills; nurse and athletic trainer roles defined; casualty collection points agreed with EMS", "Plan, drill records"]] },
-    { code: "S8", group: "S", phase: "Response", weight: 5, name: "Responder Access", short: "Responder Access",
+    { code: "S8", group: "S", phase: "Response", weight: 5, name: "Wayfinding & Responder Access", short: "Wayfinding & Access",
       items: [
         ["Responder maps", "None", "Floor plans exist, not shared", "Gridded responder maps (e.g., Collaborative Response Graphics) shared with police, fire and dispatch; updated yearly", "Maps, agency confirmation"],
         ["Exterior labeling", "None", "Rooms numbered inside only", "Building sides labeled A/B/C/D, exterior doors numbered, room numbers visible from outside", "Walk the exterior"],
@@ -420,12 +422,12 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         ["Camera access", "No cameras, or no responder access", "On-site viewing only", "Secure remote access for dispatch and police under a written use policy, tested in a drill", "Policy, live test"]] },
     { code: "S9", group: "S", phase: "Recovery", weight: 5, name: "Reunification & Recovery", short: "Reunification",
       items: [
-        ["Plan", "None", "Written plan", "Formal method (e.g., Standard Reunification Method); primary and backup sites; teams assigned", "Plan"],
+        ["Plan", "None", "Written plan", "Formal, trauma-informed method (e.g., Standard Reunification Method); primary and backup sites; teams assigned; accessible to families with disabilities or language needs", "Plan"],
         ["Exercise", "Never", "Tabletop only", "Functional exercise every 2 years, including transport", "Exercise records"],
         ["Release accountability", "None", "Paper sign-out", "ID checked against authorized guardians; digital release record", "Demo"],
         ["Recovery", "None", "Counseling contacts listed", "Written mental health recovery plan; crisis communication templates; family assistance staff assigned", "Plan, templates"]] },
 
-    { code: "P1", group: "P", weight: 20, name: "Response Time Analysis & Planning", short: "Response Time Planning", with: "Police, dispatch",
+    { code: "P1", group: "P", weight: 15, name: "Response Time Analysis & Planning", short: "Response Time Planning", with: "Police, dispatch",
       explain: "Response times vary with staffing, distance and other calls in progress. P1 does not reward a fast agency or penalize a rural one. It scores whether the agencies and the school know their realistic response window, including the worst case, and plan around it.",
       items: [
         ["Response time analysis", "Unknown", "Agency-wide average only", "Campus-specific analysis from dispatch records showing typical and worst-case times (90th percentile), including nights, weekends, school events and times when nearby units are on other calls", "Dispatch records"],
@@ -460,7 +462,12 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         ["Live video access", "None", "Access exists, never tested", "Dispatch or a real-time crime center can view school cameras live, tested yearly", "Live test"],
         ["Relay role", "None", "Informal", "A designated, trained dispatcher or analyst relays suspect location and conditions to entry teams", "Role description, exercise"],
         ["Use policy", "None", "Informal understanding", "Written policy limits live access to emergencies; access logged and audited", "Policy, audit log"]],
-      caps: [{ text: "Live video access exists without a written use policy", max: 50 }] }
+      caps: [{ text: "Live video access exists without a written use policy", max: 50 }] },
+    { code: "P7", group: "P", weight: 5, name: "Victim Services & Family Assistance", short: "Victim Services", with: "Police, victim services, medical examiner, county emergency management",
+      items: [
+        ["Family assistance center", "None", "Generic county plan", "Pre-planned family assistance center separate from the reunification site, staffed by agencies, exercised", "Plan, exercise records"],
+        ["Notification of families", "No protocol", "Written protocol", "Trained notification teams (law enforcement with a chaplain or victim advocate), coordinated with the medical examiner, trauma-informed", "Protocol, training records"],
+        ["Victim services and long-term recovery", "None", "Victim advocate on call", "Victim services and crisis counseling pre-arranged; long-term recovery plan agreed with the district", "Agreements, plan"]] }
   ];
   var GROUPS = { S: "School Readiness", P: "Public Safety Readiness" };
   var EV = { V: { label: "Verified", m: 1 }, D: { label: "Documented", m: 0.9 }, S: { label: "Self-reported", m: 0.8 } };
@@ -497,12 +504,12 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     var a = blank();
     a.id = SAMPLE_ID; a.school = "Sample: Lincoln Middle School"; a.district = "Example School District"; a.assessor = "Example assessor";
     var r = {
-      S1: [[7, "D"], [5, "D"], [5, "S"], [3, "D"], [5, "S"]], S2: [[5, "D"], [5, "S"], [7, "V"], [3, "S"]],
-      S3: [[7, "V"], [5, "V"], [7, "V"], [3, "D"]], S4: [[5, "D"], [7, "D"], [5, "D"], [7, "S"]],
+      S1: [[7, "D"], [5, "D"], [5, "S"], [3, "D"], [5, "S"]], S2: [[5, "D"], [5, "S"], [7, "V"], [5, "D"], [3, "S"]],
+      S3: [[7, "V"], [5, "V"], [7, "V"], [3, "D"], [5, "V"]], S4: [[5, "D"], [7, "D"], [5, "D"], [7, "S"]],
       S5: [[7, "D"], [5, "D"], [7, "D"], [3, "S"], [5, "D"], [3, "D"]], S6: [[5, "V"], [5, "V"], [5, "V"], [3, "S"], [5, "V"]],
       S7: [[3, "V"], [3, "D"], [0, "D"]], S8: [[3, "D"], [3, "V"], [5, "V"], [5, "D"]], S9: [[5, "D"], [3, "D"], [5, "S"], [3, "D"]],
       P1: [[5, "D"], [0, "S"], [3, "S"]], P2: [[7, "D"], [10, "D"], [5, "V"], [3, "S"]], P3: [[3, "D"], [5, "D"], [5, "V"], [3, "D"]],
-      P4: [[5, "D"], [3, "D"], [5, "D"], [3, "S"]], P5: [[3, "D"], [5, "S"], [5, "D"], [3, "S"]], P6: [[5, "S"], [0, "S"], [0, "S"]]
+      P4: [[5, "D"], [3, "D"], [5, "D"], [3, "S"]], P5: [[3, "D"], [5, "S"], [5, "D"], [3, "S"]], P6: [[5, "S"], [0, "S"], [0, "S"]], P7: [[5, "D"], [3, "S"], [5, "D"]]
     };
     Object.keys(r).forEach(function (c) { r[c].forEach(function (x, i) { a.items[c + "." + i] = { r: x[0], e: x[1] }; }); });
     a.caps["S3.0"] = true;
