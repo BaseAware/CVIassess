@@ -8,6 +8,7 @@ Web app for the Baseline Awareness *Violent Critical Incident Readiness Assessme
 - Caps for disqualifying conditions (domain or sub-item maximums)
 - Readiness bands: 0–39 Critical gaps, 40–59 Developing, 60–79 Established, 80–100 Advanced
 - Comments box under every sub-item (included in the PDF and copied summary)
+- About panel (header button) listing the sources the rubric is based on; also printed as the last page of the PDF
 - Observation notes per domain; saved assessments in the browser; duplicate, delete
 - PDF report export (top toolbar and bottom of the assessment), copy summary, JSON export/import, print
 - Brand intro video on first load (`assets/intro.mp4`)

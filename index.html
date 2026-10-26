@@ -196,6 +196,17 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
 }
 
 /* v2: two scores, sub-items with evidence levels and caps */
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 22px; display: grid; gap: 18px; }
+.about-head { display: flex; gap: 12px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+.about h2 { margin: 0; font: 600 22px/1.2 var(--font-display); text-wrap: balance; }
+.about > p { margin: 0; max-width: 72ch; color: var(--muted); }
+.about-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; }
+.about-grid h3 { margin: 0 0 4px; font: 600 15px/1.3 var(--font-display); }
+.about-grid p { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
+.about-grid ul { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 3px; }
+.about-score { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 6px; font-size: 14px; }
+.about-score ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+@media (max-width: 720px) { .about-grid { grid-template-columns: minmax(0, 1fr); } }
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .tab {
   border: 0; background: none; padding: 10px 14px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--muted);
@@ -260,6 +271,7 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
     </div>
     <div class="toolbar">
       <select id="picker" class="btn" aria-label="Saved assessments"></select>
+      <button id="aboutBtn" class="btn" type="button" aria-expanded="false" aria-controls="about">About</button>
       <button id="newBtn" class="btn primary" type="button">New assessment</button>
       <button id="dupBtn" class="btn" type="button">Duplicate</button>
       <button id="delBtn" class="btn danger" type="button">Delete</button>
@@ -278,6 +290,14 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
 </header>
 
 <main class="wrap">
+  <section class="about" id="about" hidden aria-labelledby="about-title">
+    <div class="about-head"><h2 id="about-title">What this assessment is based on</h2><button id="aboutClose" class="btn" type="button">Close</button></div>
+    <p id="about-intro"></p>
+    <div class="about-grid" id="about-groups"></div>
+    <div class="about-score"><b>How it is scored</b><ul id="about-scoring"></ul></div>
+    <p id="about-limits"></p>
+  </section>
+
   <section class="intro">
     <h1>Violent Critical Incident Readiness Assessment</h1>
     <p>This evidence-based readiness assessment produces two scores. School Readiness covers what the school controls. Public Safety Readiness covers what police, fire, EMS and dispatch control. Each sub-item is rated 0–10 against written anchors, then weighted by how it was confirmed: verified on site, documented, or self-reported. It is not a predictor of violence.</p>
@@ -485,6 +505,63 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
   var SAMPLE_ID = "sample";
   var byCode = {}; DOMAINS.forEach(function (d) { byCode[d.code] = d; });
 
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  // About content, shared by the About panel and the PDF.
+  var ABOUT = {
+    intro: "The rubric draws on what went wrong, and what worked, in real school attacks and other mass-casualty events, together with federal research and national standards. It measures what a school and its responders can do under stress, not just what they own.",
+    groups: [
+      { title: "Incident reviews and commission reports", desc: "Official after-action and investigative reports on major attacks.", items: [
+        "Columbine Review Commission Report (Columbine High School, 1999)",
+        "Virginia Tech Review Panel Report (2007)",
+        "Sandy Hook Advisory Commission Final Report (Sandy Hook Elementary, 2012)",
+        "Marjory Stoneman Douglas High School Public Safety Commission Reports (2018)",
+        "Oxford High School independent investigation (2021)",
+        "U.S. Department of Justice Critical Incident Review: Robb Elementary, Uvalde (2022)"] },
+      { title: "Law enforcement investigative records", desc: "Used to understand how the first minutes of a response unfolded.", items: [
+        "Police investigative summaries and timelines",
+        "Dispatch transcripts and radio logs",
+        "Investigative files, including the Sandy Hook Elementary and Covenant School (Nashville, 2023) cases"] },
+      { title: "Federal and academic research", desc: "Research on prevention, threat assessment and response.", items: [
+        "U.S. Secret Service National Threat Assessment Center (NTAC)",
+        "Federal Bureau of Investigation (FBI)",
+        "RAND Corporation",
+        "National Institute of Justice (NIJ)",
+        "National Academies of Sciences, Engineering, and Medicine",
+        "University of Virginia, Comprehensive School Threat Assessment Guidelines (CSTAG)"] },
+      { title: "Standards and practice guidance", desc: "National codes and field-tested practice frameworks.", items: [
+        "NFPA 101 Life Safety Code and NFPA 3000 (Active Shooter/Hostile Event Response)",
+        "NASP and NASRO guidance on armed assailant drills",
+        "CISA and U.S. Secret Service K-12 Bystander Reporting Toolkit",
+        "I Love U Guys Foundation, Standard Reunification Method",
+        "Safe and Sound Schools, Especially Safe (TEAMS framework)",
+        "Stop the Bleed"] }
+    ],
+    scoring: [
+      "Two scores, never averaged: School Readiness (what the school controls) and Public Safety Readiness (what police, fire, EMS and dispatch control).",
+      "Each sub-item is rated 0–10 against written anchors at 0, 5 and 10.",
+      "Ratings are weighted by evidence: Verified on site 1.0, Documented 0.9, Self-reported 0.8.",
+      "Caps limit a domain when a disqualifying condition is found, such as a propped exterior door or a deceptive drill.",
+      "Readiness bands: 0–39 Critical gaps, 40–59 Developing, 60–79 Established, 80–100 Advanced."
+    ],
+    limits: "The assessment applies these sources but has not been independently validated. It is not a predictor of violence nor a guarantor of safety, and findings should be reviewed with local public safety agencies."
+  };
+  (function renderAbout() {
+    document.getElementById("about-intro").textContent = ABOUT.intro;
+    document.getElementById("about-groups").innerHTML = ABOUT.groups.map(function (g) {
+      return "<div><h3>" + esc(g.title) + "</h3><p>" + esc(g.desc) + "</p><ul>" + g.items.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") + "</ul></div>";
+    }).join("");
+    document.getElementById("about-scoring").innerHTML = ABOUT.scoring.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("");
+    document.getElementById("about-limits").textContent = ABOUT.limits;
+  })();
+  function showAbout(on) {
+    var el = document.getElementById("about"), b = document.getElementById("aboutBtn");
+    el.hidden = !on; b.setAttribute("aria-expanded", on);
+    if (on) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  document.getElementById("aboutBtn").addEventListener("click", function () { showAbout(document.getElementById("about").hidden); });
+  document.getElementById("aboutClose").addEventListener("click", function () { showAbout(false); });
+  if (location.hash === "#about") showAbout(true);
+
   var inFrame = (function () { try { return window.self !== window.top; } catch (e) { return true; } })();
   var downloads = null;
   function setDl(on) { document.querySelectorAll(".dl-only").forEach(function (el) { el.hidden = !on; }); }
@@ -499,7 +576,6 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
 
   function $(id) { return document.getElementById(id); }
   function fmt(n) { return (Math.round(n * 10) / 10).toString(); }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function uid() { return "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function today() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   function key(d, i) { return d.code + "." + i; }
@@ -870,10 +946,29 @@ table.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; fo
         y += 14;
       });
     });
+    // About this assessment
+    doc.addPage(); y = M;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14); color(INK); doc.text("About this assessment", M, y); y += 18;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); color(INK);
+    var ai = doc.splitTextToSize(ascii(ABOUT.intro), W - 2 * M); doc.text(ai, M, y); y += ai.length * 12 + 10;
+    ABOUT.groups.forEach(function (g) {
+      need(40);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11); color(INK); doc.text(ascii(g.title), M, y); y += 13;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9); color(MUTED); doc.text(ascii(g.desc), M, y); y += 13;
+      color(INK);
+      g.items.forEach(function (it) { var l = doc.splitTextToSize("- " + ascii(it), W - 2 * M - 10); need(l.length * 11); doc.text(l, M + 8, y); y += l.length * 11 + 1; });
+      y += 8;
+    });
+    need(60);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); color(INK); doc.text("How it is scored", M, y); y += 14;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+    ABOUT.scoring.forEach(function (it) { var l = doc.splitTextToSize("- " + ascii(it), W - 2 * M - 10); need(l.length * 11); doc.text(l, M + 8, y); y += l.length * 11 + 1; });
+    y += 6;
+    var lim = doc.splitTextToSize(ascii(ABOUT.limits), W - 2 * M); need(lim.length * 11); color(MUTED); doc.text(lim, M, y); y += lim.length * 11;
+
     // Method and disclaimer close the report
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); color(MUTED);
-    var ev = "Evidence multipliers: Verified 1.0, Documented 0.9, Self-reported 0.8. Bands: 0-39 Critical gaps, 40-59 Developing, 60-79 Established, 80-100 Advanced.";
-    var foot = doc.splitTextToSize(ev, W - 2 * M).concat([""], doc.splitTextToSize(ascii(document.querySelector(".disclaimer").textContent), W - 2 * M));
+    var foot = doc.splitTextToSize(ascii(document.querySelector(".disclaimer").textContent), W - 2 * M);
     y += 16; need(foot.length * 10); doc.text(foot, M, y);
     var n = doc.getNumberOfPages();
     for (var pg = 1; pg <= n; pg++) {
